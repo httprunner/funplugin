@@ -2,7 +2,7 @@
 // versions:
 // - protoc-gen-go-grpc v1.2.0
 // - protoc             v3.19.4
-// source: plugin/proto/debugtalk.proto
+// source: proto/debugtalk.proto
 
 package proto
 
@@ -137,5 +137,5 @@ var DebugTalk_ServiceDesc = grpc.ServiceDesc{
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "plugin/proto/debugtalk.proto",
+	Metadata: "proto/debugtalk.proto",
 }

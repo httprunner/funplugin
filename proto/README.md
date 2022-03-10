@@ -24,10 +24,10 @@ $ export PATH="$PATH:$(go env GOPATH)/bin"
 ### Generate gRPC code
 
 ```bash
-$ protoc --go_out=. --go-grpc_out=. plugin/proto/debugtalk.proto
+$ protoc --go_out=. --go-grpc_out=. proto/debugtalk.proto
 ```
 
-This will generate two go files in `plugin/go/proto` folder:
+This will generate two go files in `go/proto` folder:
 
 - debugtalk.pb.go
 - debugtalk_grpc.pb.go
@@ -53,10 +53,10 @@ $ pip3 install grpcio-tools
 ### Generate gRPC code
 
 ```bash
-$ python3 -m grpc_tools.protoc -I plugin/proto --python_out=plugin/python/ --grpc_python_out=plugin/python/ plugin/proto/debugtalk.proto
+$ python3 -m grpc_tools.protoc -I proto --python_out=python/ --grpc_python_out=python/ proto/debugtalk.proto
 ```
 
-This will generate two python files in `plugin/python` folder:
+This will generate two python files in `python` folder:
 
 - debugtalk_pb2.py
 - debugtalk_pb2_grpc.py
