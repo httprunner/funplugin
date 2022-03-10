@@ -8,7 +8,7 @@ import (
 	"github.com/rs/zerolog/log"
 	"google.golang.org/grpc"
 
-	"github.com/httprunner/hrp/plugin/go/proto"
+	"github.com/httprunner/plugin/go/proto"
 	jsoniter "github.com/json-iterator/go"
 )
 

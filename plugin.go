@@ -9,8 +9,8 @@ import (
 	"github.com/hashicorp/go-plugin"
 	"github.com/rs/zerolog/log"
 
-	pluginInternal "github.com/httprunner/hrp/plugin/go"
-	pluginUtils "github.com/httprunner/hrp/plugin/utils"
+	pluginInternal "github.com/httprunner/plugin/go"
+	pluginUtils "github.com/httprunner/plugin/utils"
 )
 
 // functionsMap stores plugin functions
