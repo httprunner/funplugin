@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"path/filepath"
 
 	"github.com/hashicorp/go-hclog"
 	"github.com/hashicorp/go-plugin"
@@ -40,7 +41,14 @@ func (p *HashicorpPlugin) Init(path string) error {
 	}
 
 	// cmd
-	cmd := exec.Command(path)
+	var cmd *exec.Cmd
+	if filepath.Base(path) == string(hashicorpPyPluginFile) {
+		// hashicorp python plugin
+		cmd = exec.Command("python3", path)
+	} else {
+		// go plugin
+		cmd = exec.Command(path)
+	}
 	cmd.Env = append(os.Environ(), fmt.Sprintf("%s=%s", hrpPluginTypeEnvName, hrpPluginType))
 
 	// launch the plugin process
