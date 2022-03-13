@@ -27,7 +27,7 @@ $ export PATH="$PATH:$(go env GOPATH)/bin"
 $ protoc --go_out=. --go-grpc_out=. proto/debugtalk.proto
 ```
 
-This will generate two go files in `go/proto` folder:
+This will generate two go files in `go/protoGen` folder:
 
 - debugtalk.pb.go
 - debugtalk_grpc.pb.go

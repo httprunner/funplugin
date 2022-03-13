@@ -4,7 +4,7 @@
 // - protoc             v3.19.4
 // source: proto/debugtalk.proto
 
-package proto
+package protoGen
 
 import (
 	context "context"
