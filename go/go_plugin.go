@@ -8,7 +8,7 @@ import (
 
 	"github.com/rs/zerolog/log"
 
-	pluginUtils "github.com/httprunner/plugin/utils"
+	pluginUtils "github.com/httprunner/plugin/go/utils"
 )
 
 // GoPlugin implements golang official plugin
