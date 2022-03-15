@@ -2,11 +2,11 @@
 
 When you need to do some dynamic calculations or custom logic processing in testcases, you need to use the plugin function mechanism.
 
-HttpRunner+ supports both [hashicorp/plugin] and [go plugin] to create and call custom functions.
+HttpRunner+ supports both [hashicorp plugin] and [go plugin] to create and call custom functions.
 
-## hashicorp/plugin
+## hashicorp plugin
 
-It is recommended to use [hashicorp/plugin] in most cases.
+It is recommended to use [hashicorp plugin] in most cases.
 
 ### create plugin functions
 
@@ -101,7 +101,7 @@ Then, you can call your defined plugin function in your `YAML/JSON` testcase at 
 
 ### rpc vs. gRPC
 
-HttpRunner+ has both supported `net/rpc` and `gRPC` in [hashicorp/plugin]. It is recommended to use `gRPC` and this is the default choice.
+HttpRunner+ has both supported `net/rpc` and `gRPC` in [hashicorp plugin]. It is recommended to use `gRPC` and this is the default choice.
 
 If you want to run plugin in `net/rpc` mode, you can set an environment variable `HRP_PLUGIN_TYPE=rpc`.
 
@@ -196,7 +196,7 @@ Then, you can call your defined plugin function in your `YAML/JSON` testcase at 
 
 Notice: you should use the original function name.
 
-[hashicorp/plugin]: https://github.com/hashicorp/go-plugin
+[hashicorp plugin]: https://github.com/hashicorp/go-plugin
 [go plugin]: https://pkg.go.dev/plugin
 [examples/plugin/]: ../examples/plugin/
 [examples/plugin/debugtalk.go]: ../examples/plugin/debugtalk.go
