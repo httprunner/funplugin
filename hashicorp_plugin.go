@@ -1,4 +1,4 @@
-package plugin
+package funcPlugin
 
 import (
 	"fmt"
@@ -11,7 +11,7 @@ import (
 	"github.com/pkg/errors"
 	"github.com/rs/zerolog/log"
 
-	hrpPlugin "github.com/httprunner/func-plugin/go"
+	funcGoPlugin "github.com/httprunner/func-plugin/go"
 	"github.com/httprunner/func-plugin/shared"
 )
 
@@ -59,8 +59,8 @@ func (p *hashicorpPlugin) Init(path string) error {
 	p.client = plugin.NewClient(&plugin.ClientConfig{
 		HandshakeConfig: shared.HandshakeConfig,
 		Plugins: map[string]plugin.Plugin{
-			shared.PluginName + "_rpc":  &hrpPlugin.RPCPlugin{},
-			shared.PluginName + "_grpc": &hrpPlugin.GRPCPlugin{},
+			shared.PluginName + "_rpc":  &funcGoPlugin.RPCPlugin{},
+			shared.PluginName + "_grpc": &funcGoPlugin.GRPCPlugin{},
 		},
 		Cmd:    cmd,
 		Logger: hclog.New(loggerOptions),

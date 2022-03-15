@@ -1,4 +1,4 @@
-package hrpPlugin
+package funcGoPlugin
 
 import (
 	"fmt"

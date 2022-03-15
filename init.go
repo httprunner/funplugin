@@ -1,4 +1,4 @@
-package plugin
+package funcPlugin
 
 import (
 	"github.com/httprunner/func-plugin/shared"

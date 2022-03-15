@@ -1,7 +1,7 @@
 // +build linux freebsd darwin
 // go plugin doesn't support windows
 
-package plugin
+package funcPlugin
 
 import (
 	"fmt"
