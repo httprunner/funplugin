@@ -1,7 +1,7 @@
 package plugin
 
 import (
-	"github.com/httprunner/plugin/shared"
+	"github.com/httprunner/func-plugin/shared"
 )
 
 type IPlugin interface {

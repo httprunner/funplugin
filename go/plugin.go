@@ -9,7 +9,7 @@ import (
 	"github.com/hashicorp/go-plugin"
 	"github.com/rs/zerolog/log"
 
-	"github.com/httprunner/plugin/shared"
+	"github.com/httprunner/func-plugin/shared"
 )
 
 // functionsMap stores plugin functions

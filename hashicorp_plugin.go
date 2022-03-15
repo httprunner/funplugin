@@ -11,8 +11,8 @@ import (
 	"github.com/pkg/errors"
 	"github.com/rs/zerolog/log"
 
-	hrpPlugin "github.com/httprunner/plugin/go"
-	"github.com/httprunner/plugin/shared"
+	hrpPlugin "github.com/httprunner/func-plugin/go"
+	"github.com/httprunner/func-plugin/shared"
 )
 
 // hashicorpPlugin implements hashicorp/go-plugin

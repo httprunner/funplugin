@@ -1,4 +1,9 @@
-# plugin
+# Func-Plugin
+
+[![Go Reference](https://pkg.go.dev/badge/github.com/httprunner/func-plugin.svg)](https://pkg.go.dev/github.com/httprunner/func-plugin)
+[![Github Actions](https://github.com/httprunner/func-plugin/actions/workflows/unittest.yml/badge.svg)](https://github.com/httprunner/func-plugin/actions)
+[![codecov](https://codecov.io/gh/httprunner/func-plugin/branch/main/graph/badge.svg?token=DW3K2R1PNC)](https://codecov.io/gh/httprunner/func-plugin)
+[![Go Report Card](https://goreportcard.com/badge/github.com/httprunner/func-plugin)](https://goreportcard.com/report/github.com/httprunner/func-plugin)
 
 When you need to do some dynamic calculations or custom logic processing in testcases, you need to use the plugin function mechanism.
 
@@ -23,7 +28,7 @@ package main
 import (
 	"fmt"
 
-	"github.com/httprunner/plugin"
+	"github.com/httprunner/func-plugin"
 )
 
 func SumTwoInt(a, b int) int {

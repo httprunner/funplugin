@@ -1,4 +1,4 @@
-module github.com/httprunner/plugin
+module github.com/httprunner/func-plugin
 
 go 1.13
 
