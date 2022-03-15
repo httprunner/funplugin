@@ -1,4 +1,4 @@
-name: Run unittests
+name: Run unittests for go plugin
 
 on:
   push:
@@ -23,7 +23,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
       - name: Run coverage
-        run: go test -coverprofile="cover.out" -covermode=atomic -race ./...
+        run: cd go/ && go test -coverprofile="cover.out" -covermode=atomic -race ./...
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v2
         with:
