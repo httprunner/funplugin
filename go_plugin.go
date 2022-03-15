@@ -1,4 +1,4 @@
-package hrpPlugin
+package plugin
 
 import (
 	"fmt"
@@ -7,6 +7,8 @@ import (
 	"runtime"
 
 	"github.com/rs/zerolog/log"
+
+	"github.com/httprunner/plugin/shared"
 )
 
 // goPlugin implements golang official plugin
@@ -65,7 +67,7 @@ func (p *goPlugin) Call(funcName string, args ...interface{}) (interface{}, erro
 		return nil, fmt.Errorf("function %s not found", funcName)
 	}
 	fn := p.cachedFunctions[funcName]
-	return CallFunc(fn, args...)
+	return shared.CallFunc(fn, args...)
 }
 
 func (p *goPlugin) Quit() error {

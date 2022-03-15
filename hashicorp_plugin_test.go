@@ -1,4 +1,4 @@
-package hrpPlugin
+package plugin
 
 import (
 	"os"
@@ -12,8 +12,8 @@ import (
 func buildHashicorpGoPlugin() {
 	log.Info().Msg("[init] build hashicorp go plugin")
 	cmd := exec.Command("go", "build",
-		"-o", "examples/debugtalk.bin",
-		"examples/hashicorp.go", "examples/debugtalk.go")
+		"-o", "go/examples/debugtalk.bin",
+		"go/examples/hashicorp.go", "go/examples/debugtalk.go")
 	if err := cmd.Run(); err != nil {
 		panic(err)
 	}
@@ -29,14 +29,14 @@ func TestHashicorpPlugin(t *testing.T) {
 	defer removeHashicorpGoPlugin()
 
 	var plugins []IPlugin
-	plugin1, err := Init("examples/debugtalk.bin", false)
+	plugin1, err := Init("go/examples/debugtalk.bin", false)
 	if err != nil {
 		t.Fatal(err)
 	}
 	defer plugin1.Quit()
 	plugins = append(plugins, plugin1)
 
-	plugin2, err := Init("../python/examples/debugtalk.py", false)
+	plugin2, err := Init("python/examples/debugtalk.py", false)
 	if err != nil {
 		t.Fatal(err)
 	}

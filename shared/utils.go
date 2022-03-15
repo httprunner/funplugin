@@ -1,4 +1,4 @@
-package hrpPlugin
+package shared
 
 import (
 	"fmt"
@@ -104,9 +104,9 @@ func call(fn reflect.Value, args []reflect.Value) (interface{}, error) {
 	}
 }
 
-// locateFile searches destFile upward recursively until current
+// LocateFile searches destFile upward recursively until current
 // working directory or system root dir.
-func locateFile(startPath string, destFile string) (string, error) {
+func LocateFile(startPath string, destFile string) (string, error) {
 	stat, err := os.Stat(startPath)
 	if os.IsNotExist(err) {
 		return "", err
@@ -138,5 +138,5 @@ func locateFile(startPath string, destFile string) (string, error) {
 		return "", fmt.Errorf("searched to system root dir, plugin file not found")
 	}
 
-	return locateFile(parentDir, destFile)
+	return LocateFile(parentDir, destFile)
 }

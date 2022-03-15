@@ -8,6 +8,8 @@ import (
 	hclog "github.com/hashicorp/go-hclog"
 	"github.com/hashicorp/go-plugin"
 	"github.com/rs/zerolog/log"
+
+	"github.com/httprunner/plugin/shared"
 )
 
 // functionsMap stores plugin functions
@@ -35,7 +37,7 @@ func (p *functionPlugin) Call(funcName string, args ...interface{}) (interface{}
 		return nil, fmt.Errorf("function %s not found", funcName)
 	}
 
-	return CallFunc(fn, args...)
+	return shared.CallFunc(fn, args...)
 }
 
 var functions = make(functionsMap)
@@ -51,6 +53,7 @@ func Register(funcName string, fn interface{}) {
 
 // serveRPC starts a plugin server process in RPC mode.
 func serveRPC() {
+	rpcPluginName := shared.PluginName + "_rpc"
 	log.Info().Msg("start plugin server in RPC mode")
 	funcPlugin := &functionPlugin{
 		logger: hclog.New(&hclog.LoggerOptions{
@@ -61,17 +64,18 @@ func serveRPC() {
 		functions: functions,
 	}
 	var pluginMap = map[string]plugin.Plugin{
-		rpcPluginName: &rpcPlugin{Impl: funcPlugin},
+		rpcPluginName: &RPCPlugin{Impl: funcPlugin},
 	}
 	// start RPC server
 	plugin.Serve(&plugin.ServeConfig{
-		HandshakeConfig: handshakeConfig,
+		HandshakeConfig: shared.HandshakeConfig,
 		Plugins:         pluginMap,
 	})
 }
 
 // serveGRPC starts a plugin server process in gRPC mode.
 func serveGRPC() {
+	grpcPluginName := shared.PluginName + "_grpc"
 	log.Info().Msg("start plugin server in gRPC mode")
 	funcPlugin := &functionPlugin{
 		logger: hclog.New(&hclog.LoggerOptions{
@@ -82,11 +86,11 @@ func serveGRPC() {
 		functions: functions,
 	}
 	var pluginMap = map[string]plugin.Plugin{
-		grpcPluginName: &grpcPlugin{Impl: funcPlugin},
+		grpcPluginName: &GRPCPlugin{Impl: funcPlugin},
 	}
 	// start gRPC server
 	plugin.Serve(&plugin.ServeConfig{
-		HandshakeConfig: handshakeConfig,
+		HandshakeConfig: shared.HandshakeConfig,
 		Plugins:         pluginMap,
 		GRPCServer:      plugin.DefaultGRPCServer,
 	})
@@ -94,7 +98,7 @@ func serveGRPC() {
 
 // default to run plugin in gRPC mode
 func Serve() {
-	if isRPCPluginType() {
+	if os.Getenv(shared.PluginTypeEnvName) == "rpc" {
 		serveRPC()
 	} else {
 		// default

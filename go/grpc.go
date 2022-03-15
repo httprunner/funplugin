@@ -9,6 +9,7 @@ import (
 	"google.golang.org/grpc"
 
 	"github.com/httprunner/plugin/go/protoGen"
+	"github.com/httprunner/plugin/shared"
 	jsoniter "github.com/json-iterator/go"
 )
 
@@ -61,7 +62,7 @@ func (m *functionGRPCClient) Call(funcName string, funcArgs ...interface{}) (int
 // Here is the gRPC server that functionGRPCClient talks to.
 type functionGRPCServer struct {
 	protoGen.UnimplementedDebugTalkServer
-	Impl IFuncCaller
+	Impl shared.IFuncCaller
 }
 
 func (m *functionGRPCServer) GetNames(ctx context.Context, req *protoGen.Empty) (*protoGen.GetNamesResponse, error) {
@@ -95,17 +96,17 @@ func (m *functionGRPCServer) Call(ctx context.Context, req *protoGen.CallRequest
 	return &protoGen.CallResponse{Value: value}, err
 }
 
-// grpcPlugin implements hashicorp's plugin.grpcPlugin.
-type grpcPlugin struct {
+// GRPCPlugin implements hashicorp's plugin.GRPCPlugin.
+type GRPCPlugin struct {
 	plugin.Plugin
-	Impl IFuncCaller
+	Impl shared.IFuncCaller
 }
 
-func (p *grpcPlugin) GRPCServer(broker *plugin.GRPCBroker, s *grpc.Server) error {
+func (p *GRPCPlugin) GRPCServer(broker *plugin.GRPCBroker, s *grpc.Server) error {
 	protoGen.RegisterDebugTalkServer(s, &functionGRPCServer{Impl: p.Impl})
 	return nil
 }
 
-func (p *grpcPlugin) GRPCClient(ctx context.Context, broker *plugin.GRPCBroker, c *grpc.ClientConn) (interface{}, error) {
+func (p *GRPCPlugin) GRPCClient(ctx context.Context, broker *plugin.GRPCBroker, c *grpc.ClientConn) (interface{}, error) {
 	return &functionGRPCClient{client: protoGen.NewDebugTalkClient(c)}, nil
 }

@@ -1,4 +1,4 @@
-package hrpPlugin
+package plugin
 
 import (
 	"fmt"
@@ -10,24 +10,28 @@ import (
 	"github.com/hashicorp/go-plugin"
 	"github.com/pkg/errors"
 	"github.com/rs/zerolog/log"
-)
 
-var client *plugin.Client
+	hrpPlugin "github.com/httprunner/plugin/go"
+	"github.com/httprunner/plugin/shared"
+)
 
 // hashicorpPlugin implements hashicorp/go-plugin
 type hashicorpPlugin struct {
-	funcCaller      IFuncCaller
+	client          *plugin.Client
+	pluginType      string
+	funcCaller      shared.IFuncCaller
 	logOn           bool            // turn on plugin log
 	cachedFunctions map[string]bool // cache loaded functions to improve performance
 }
 
 func (p *hashicorpPlugin) Init(path string) error {
-	var pluginName string
-	if isRPCPluginType() {
-		pluginName = rpcPluginName
+	pluginType := os.Getenv(shared.PluginTypeEnvName)
+	if pluginType == "rpc" {
+		p.pluginType = pluginType
 	} else {
-		pluginName = grpcPluginName
+		p.pluginType = "grpc" // default
 	}
+	pluginName := shared.PluginName + "_" + p.pluginType
 
 	// logger
 	loggerOptions := &hclog.LoggerOptions{
@@ -42,21 +46,21 @@ func (p *hashicorpPlugin) Init(path string) error {
 
 	// cmd
 	var cmd *exec.Cmd
-	if filepath.Base(path) == hashicorpPyPluginFile {
+	if filepath.Base(path) == shared.HashicorpPyPluginFile {
 		// hashicorp python plugin
 		cmd = exec.Command("python3", path)
 	} else {
 		// go plugin
 		cmd = exec.Command(path)
 	}
-	cmd.Env = append(os.Environ(), fmt.Sprintf("%s=%s", hrpPluginTypeEnvName, hrpPluginType))
+	cmd.Env = append(os.Environ(), fmt.Sprintf("%s=%s", shared.PluginTypeEnvName, p.pluginType))
 
 	// launch the plugin process
-	client = plugin.NewClient(&plugin.ClientConfig{
-		HandshakeConfig: handshakeConfig,
+	p.client = plugin.NewClient(&plugin.ClientConfig{
+		HandshakeConfig: shared.HandshakeConfig,
 		Plugins: map[string]plugin.Plugin{
-			rpcPluginName:  &rpcPlugin{},
-			grpcPluginName: &grpcPlugin{},
+			shared.PluginName + "_rpc":  &hrpPlugin.RPCPlugin{},
+			shared.PluginName + "_grpc": &hrpPlugin.GRPCPlugin{},
 		},
 		Cmd:    cmd,
 		Logger: hclog.New(loggerOptions),
@@ -67,20 +71,20 @@ func (p *hashicorpPlugin) Init(path string) error {
 	})
 
 	// Connect via RPC/gRPC
-	rpcClient, err := client.Client()
+	rpcClient, err := p.client.Client()
 	if err != nil {
-		return errors.Wrap(err, fmt.Sprintf("connect %s plugin failed", hrpPluginType))
+		return errors.Wrap(err, fmt.Sprintf("connect %s plugin failed", p.pluginType))
 	}
 
 	// Request the plugin
 	raw, err := rpcClient.Dispense(pluginName)
 	if err != nil {
-		return errors.Wrap(err, fmt.Sprintf("request %s plugin failed", hrpPluginType))
+		return errors.Wrap(err, fmt.Sprintf("request %s plugin failed", p.pluginType))
 	}
 
 	// We should have a Function now! This feels like a normal interface
 	// implementation but is in fact over an RPC connection.
-	p.funcCaller = raw.(IFuncCaller)
+	p.funcCaller = raw.(shared.IFuncCaller)
 
 	p.cachedFunctions = make(map[string]bool)
 	log.Info().Str("path", path).Msg("load hashicorp go plugin success")
@@ -88,7 +92,7 @@ func (p *hashicorpPlugin) Init(path string) error {
 }
 
 func (p *hashicorpPlugin) Type() string {
-	return fmt.Sprintf("hashicorp-%s", hrpPluginType)
+	return fmt.Sprintf("hashicorp-%s", p.pluginType)
 }
 
 func (p *hashicorpPlugin) Has(funcName string) bool {
@@ -120,6 +124,6 @@ func (p *hashicorpPlugin) Call(funcName string, args ...interface{}) (interface{
 func (p *hashicorpPlugin) Quit() error {
 	// kill hashicorp plugin process
 	log.Info().Msg("quit hashicorp plugin process")
-	client.Kill()
+	p.client.Kill()
 	return nil
 }

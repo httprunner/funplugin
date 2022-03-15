@@ -1,4 +1,4 @@
-module github.com/httprunner/plugin/go
+module github.com/httprunner/plugin
 
 go 1.13
 
