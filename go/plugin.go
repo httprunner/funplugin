@@ -1,4 +1,4 @@
-package pluginInternal
+package hrpPlugin
 
 import (
 	"fmt"
@@ -8,8 +8,6 @@ import (
 	hclog "github.com/hashicorp/go-hclog"
 	"github.com/hashicorp/go-plugin"
 	"github.com/rs/zerolog/log"
-
-	pluginUtils "github.com/httprunner/plugin/go/utils"
 )
 
 // functionsMap stores plugin functions
@@ -37,7 +35,7 @@ func (p *functionPlugin) Call(funcName string, args ...interface{}) (interface{}
 		return nil, fmt.Errorf("function %s not found", funcName)
 	}
 
-	return pluginUtils.CallFunc(fn, args...)
+	return CallFunc(fn, args...)
 }
 
 var functions = make(functionsMap)
@@ -56,18 +54,18 @@ func serveRPC() {
 	log.Info().Msg("start plugin server in RPC mode")
 	funcPlugin := &functionPlugin{
 		logger: hclog.New(&hclog.LoggerOptions{
-			Name:   RPCPluginName,
+			Name:   rpcPluginName,
 			Output: os.Stdout,
 			Level:  hclog.Info,
 		}),
 		functions: functions,
 	}
 	var pluginMap = map[string]plugin.Plugin{
-		RPCPluginName: &RPCPlugin{Impl: funcPlugin},
+		rpcPluginName: &rpcPlugin{Impl: funcPlugin},
 	}
 	// start RPC server
 	plugin.Serve(&plugin.ServeConfig{
-		HandshakeConfig: HandshakeConfig,
+		HandshakeConfig: handshakeConfig,
 		Plugins:         pluginMap,
 	})
 }
@@ -77,18 +75,18 @@ func serveGRPC() {
 	log.Info().Msg("start plugin server in gRPC mode")
 	funcPlugin := &functionPlugin{
 		logger: hclog.New(&hclog.LoggerOptions{
-			Name:   GRPCPluginName,
+			Name:   grpcPluginName,
 			Output: os.Stdout,
 			Level:  hclog.Info,
 		}),
 		functions: functions,
 	}
 	var pluginMap = map[string]plugin.Plugin{
-		GRPCPluginName: &GRPCPlugin{Impl: funcPlugin},
+		grpcPluginName: &grpcPlugin{Impl: funcPlugin},
 	}
 	// start gRPC server
 	plugin.Serve(&plugin.ServeConfig{
-		HandshakeConfig: HandshakeConfig,
+		HandshakeConfig: handshakeConfig,
 		Plugins:         pluginMap,
 		GRPCServer:      plugin.DefaultGRPCServer,
 	})
@@ -96,7 +94,7 @@ func serveGRPC() {
 
 // default to run plugin in gRPC mode
 func Serve() {
-	if IsRPCPluginType() {
+	if isRPCPluginType() {
 		serveRPC()
 	} else {
 		// default

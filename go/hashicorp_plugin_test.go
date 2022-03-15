@@ -1,4 +1,4 @@
-package pluginInternal
+package hrpPlugin
 
 import (
 	"os"

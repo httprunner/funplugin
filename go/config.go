@@ -1,4 +1,4 @@
-package pluginInternal
+package hrpPlugin
 
 import (
 	"os"
@@ -7,18 +7,23 @@ import (
 	"github.com/hashicorp/go-plugin"
 )
 
-const PluginName = "debugtalk"
-const RPCPluginName = PluginName + "_rpc"
-const GRPCPluginName = PluginName + "_grpc"
+const (
+	pluginName            = "debugtalk"
+	rpcPluginName         = pluginName + "_rpc"
+	grpcPluginName        = pluginName + "_grpc"
+	goPluginFile          = pluginName + ".so"  // built from go plugin
+	hashicorpGoPluginFile = pluginName + ".bin" // built from hashicorp go plugin
+	hashicorpPyPluginFile = pluginName + ".py"
+)
 
 // handshakeConfigs are used to just do a basic handshake between
 // a plugin and host. If the handshake fails, a user friendly error is shown.
 // This prevents users from executing bad plugins or executing a plugin
 // directory. It is a UX feature, not a security feature.
-var HandshakeConfig = plugin.HandshakeConfig{
+var handshakeConfig = plugin.HandshakeConfig{
 	ProtocolVersion:  1,
 	MagicCookieKey:   "HttpRunnerPlus",
-	MagicCookieValue: PluginName,
+	MagicCookieValue: pluginName,
 }
 
 const hrpPluginTypeEnvName = "HRP_PLUGIN_TYPE"
@@ -32,6 +37,6 @@ func init() {
 	}
 }
 
-func IsRPCPluginType() bool {
+func isRPCPluginType() bool {
 	return hrpPluginType == "rpc"
 }

@@ -1,6 +1,6 @@
-module github.com/httprunner/plugin
+module github.com/httprunner/plugin/go
 
-go 1.16
+go 1.13
 
 require (
 	github.com/hashicorp/go-hclog v1.1.0

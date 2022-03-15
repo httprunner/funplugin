@@ -1,4 +1,4 @@
-package pluginInternal
+package hrpPlugin
 
 import (
 	"context"
@@ -61,7 +61,7 @@ func (m *functionGRPCClient) Call(funcName string, funcArgs ...interface{}) (int
 // Here is the gRPC server that functionGRPCClient talks to.
 type functionGRPCServer struct {
 	protoGen.UnimplementedDebugTalkServer
-	Impl FuncCaller
+	Impl IFuncCaller
 }
 
 func (m *functionGRPCServer) GetNames(ctx context.Context, req *protoGen.Empty) (*protoGen.GetNamesResponse, error) {
@@ -95,17 +95,17 @@ func (m *functionGRPCServer) Call(ctx context.Context, req *protoGen.CallRequest
 	return &protoGen.CallResponse{Value: value}, err
 }
 
-// HRPPlugin implements hashicorp's plugin.GRPCPlugin.
-type GRPCPlugin struct {
+// grpcPlugin implements hashicorp's plugin.grpcPlugin.
+type grpcPlugin struct {
 	plugin.Plugin
-	Impl FuncCaller
+	Impl IFuncCaller
 }
 
-func (p *GRPCPlugin) GRPCServer(broker *plugin.GRPCBroker, s *grpc.Server) error {
+func (p *grpcPlugin) GRPCServer(broker *plugin.GRPCBroker, s *grpc.Server) error {
 	protoGen.RegisterDebugTalkServer(s, &functionGRPCServer{Impl: p.Impl})
 	return nil
 }
 
-func (p *GRPCPlugin) GRPCClient(ctx context.Context, broker *plugin.GRPCBroker, c *grpc.ClientConn) (interface{}, error) {
+func (p *grpcPlugin) GRPCClient(ctx context.Context, broker *plugin.GRPCBroker, c *grpc.ClientConn) (interface{}, error) {
 	return &functionGRPCClient{client: protoGen.NewDebugTalkClient(c)}, nil
 }

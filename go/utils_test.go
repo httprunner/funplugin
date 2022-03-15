@@ -1,4 +1,4 @@
-package pluginUtils
+package hrpPlugin
 
 import (
 	"errors"
@@ -205,4 +205,43 @@ func TestCallFuncAbnormal(t *testing.T) {
 		}
 	}
 
+}
+
+func TestLocatePlugin(t *testing.T) {
+	buildGoPlugin()
+	defer removeGoPlugin()
+
+	_, err := locateFile("../", goPluginFile)
+	if !assert.Error(t, err) {
+		t.Fail()
+	}
+
+	_, err = locateFile("", goPluginFile)
+	if !assert.Error(t, err) {
+		t.Fail()
+	}
+
+	startPath := "debugtalk.so"
+	_, err = locateFile(startPath, goPluginFile)
+	if !assert.Nil(t, err) {
+		t.Fail()
+	}
+
+	startPath = "utils.go"
+	_, err = locateFile(startPath, goPluginFile)
+	if !assert.Nil(t, err) {
+		t.Fail()
+	}
+
+	startPath = "."
+	_, err = locateFile(startPath, goPluginFile)
+	if !assert.Nil(t, err) {
+		t.Fail()
+	}
+
+	startPath = "/abc"
+	_, err = locateFile(startPath, goPluginFile)
+	if !assert.Error(t, err) {
+		t.Fail()
+	}
 }

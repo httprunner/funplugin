@@ -1,4 +1,4 @@
-package pluginInternal
+package hrpPlugin
 
 import (
 	"encoding/gob"
@@ -55,7 +55,7 @@ func (g *functionRPCClient) Call(funcName string, funcArgs ...interface{}) (inte
 
 // functionRPCServer runs on the plugin side, executing the user custom function.
 type functionRPCServer struct {
-	Impl FuncCaller
+	Impl IFuncCaller
 }
 
 // plugin execution
@@ -83,15 +83,15 @@ func (s *functionRPCServer) Call(args interface{}, resp *interface{}) error {
 	return nil
 }
 
-// RPCPlugin implements hashicorp's plugin.Plugin.
-type RPCPlugin struct {
-	Impl FuncCaller
+// rpcPlugin implements hashicorp's plugin.Plugin.
+type rpcPlugin struct {
+	Impl IFuncCaller
 }
 
-func (p *RPCPlugin) Server(*plugin.MuxBroker) (interface{}, error) {
+func (p *rpcPlugin) Server(*plugin.MuxBroker) (interface{}, error) {
 	return &functionRPCServer{Impl: p.Impl}, nil
 }
 
-func (RPCPlugin) Client(b *plugin.MuxBroker, c *rpc.Client) (interface{}, error) {
+func (p *rpcPlugin) Client(b *plugin.MuxBroker, c *rpc.Client) (interface{}, error) {
 	return &functionRPCClient{client: c}, nil
 }

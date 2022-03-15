@@ -1,4 +1,4 @@
-package pluginInternal
+package hrpPlugin
 
 import (
 	"fmt"
@@ -14,19 +14,19 @@ import (
 
 var client *plugin.Client
 
-// HashicorpPlugin implements hashicorp/go-plugin
-type HashicorpPlugin struct {
-	logOn bool // turn on plugin log
-	FuncCaller
+// hashicorpPlugin implements hashicorp/go-plugin
+type hashicorpPlugin struct {
+	funcCaller      IFuncCaller
+	logOn           bool            // turn on plugin log
 	cachedFunctions map[string]bool // cache loaded functions to improve performance
 }
 
-func (p *HashicorpPlugin) Init(path string) error {
+func (p *hashicorpPlugin) Init(path string) error {
 	var pluginName string
-	if IsRPCPluginType() {
-		pluginName = RPCPluginName
+	if isRPCPluginType() {
+		pluginName = rpcPluginName
 	} else {
-		pluginName = GRPCPluginName
+		pluginName = grpcPluginName
 	}
 
 	// logger
@@ -42,7 +42,7 @@ func (p *HashicorpPlugin) Init(path string) error {
 
 	// cmd
 	var cmd *exec.Cmd
-	if filepath.Base(path) == string(hashicorpPyPluginFile) {
+	if filepath.Base(path) == hashicorpPyPluginFile {
 		// hashicorp python plugin
 		cmd = exec.Command("python3", path)
 	} else {
@@ -53,10 +53,10 @@ func (p *HashicorpPlugin) Init(path string) error {
 
 	// launch the plugin process
 	client = plugin.NewClient(&plugin.ClientConfig{
-		HandshakeConfig: HandshakeConfig,
+		HandshakeConfig: handshakeConfig,
 		Plugins: map[string]plugin.Plugin{
-			RPCPluginName:  &RPCPlugin{},
-			GRPCPluginName: &GRPCPlugin{},
+			rpcPluginName:  &rpcPlugin{},
+			grpcPluginName: &grpcPlugin{},
 		},
 		Cmd:    cmd,
 		Logger: hclog.New(loggerOptions),
@@ -80,20 +80,24 @@ func (p *HashicorpPlugin) Init(path string) error {
 
 	// We should have a Function now! This feels like a normal interface
 	// implementation but is in fact over an RPC connection.
-	p.FuncCaller = raw.(FuncCaller)
+	p.funcCaller = raw.(IFuncCaller)
 
 	p.cachedFunctions = make(map[string]bool)
 	log.Info().Str("path", path).Msg("load hashicorp go plugin success")
 	return nil
 }
 
-func (p *HashicorpPlugin) Has(funcName string) bool {
+func (p *hashicorpPlugin) Type() string {
+	return fmt.Sprintf("hashicorp-%s", hrpPluginType)
+}
+
+func (p *hashicorpPlugin) Has(funcName string) bool {
 	flag, ok := p.cachedFunctions[funcName]
 	if ok {
 		return flag
 	}
 
-	funcNames, err := p.GetNames()
+	funcNames, err := p.funcCaller.GetNames()
 	if err != nil {
 		return false
 	}
@@ -109,11 +113,11 @@ func (p *HashicorpPlugin) Has(funcName string) bool {
 	return false
 }
 
-func (p *HashicorpPlugin) Call(funcName string, args ...interface{}) (interface{}, error) {
-	return p.FuncCaller.Call(funcName, args...)
+func (p *hashicorpPlugin) Call(funcName string, args ...interface{}) (interface{}, error) {
+	return p.funcCaller.Call(funcName, args...)
 }
 
-func (p *HashicorpPlugin) Quit() error {
+func (p *hashicorpPlugin) Quit() error {
 	// kill hashicorp plugin process
 	log.Info().Msg("quit hashicorp plugin process")
 	client.Kill()

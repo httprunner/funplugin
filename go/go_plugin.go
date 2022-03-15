@@ -1,4 +1,4 @@
-package pluginInternal
+package hrpPlugin
 
 import (
 	"fmt"
@@ -7,17 +7,15 @@ import (
 	"runtime"
 
 	"github.com/rs/zerolog/log"
-
-	pluginUtils "github.com/httprunner/plugin/go/utils"
 )
 
-// GoPlugin implements golang official plugin
-type GoPlugin struct {
+// goPlugin implements golang official plugin
+type goPlugin struct {
 	*plugin.Plugin
 	cachedFunctions map[string]reflect.Value // cache loaded functions to improve performance
 }
 
-func (p *GoPlugin) Init(path string) error {
+func (p *goPlugin) Init(path string) error {
 	if runtime.GOOS == "windows" {
 		log.Warn().Msg("go plugin does not support windows")
 		return fmt.Errorf("go plugin does not support windows")
@@ -35,7 +33,11 @@ func (p *GoPlugin) Init(path string) error {
 	return nil
 }
 
-func (p *GoPlugin) Has(funcName string) bool {
+func (p *goPlugin) Type() string {
+	return "go-plugin"
+}
+
+func (p *goPlugin) Has(funcName string) bool {
 	fn, ok := p.cachedFunctions[funcName]
 	if ok {
 		return fn.IsValid()
@@ -58,15 +60,15 @@ func (p *GoPlugin) Has(funcName string) bool {
 	return true
 }
 
-func (p *GoPlugin) Call(funcName string, args ...interface{}) (interface{}, error) {
+func (p *goPlugin) Call(funcName string, args ...interface{}) (interface{}, error) {
 	if !p.Has(funcName) {
 		return nil, fmt.Errorf("function %s not found", funcName)
 	}
 	fn := p.cachedFunctions[funcName]
-	return pluginUtils.CallFunc(fn, args...)
+	return CallFunc(fn, args...)
 }
 
-func (p *GoPlugin) Quit() error {
+func (p *goPlugin) Quit() error {
 	// no need to quit for go plugin
 	return nil
 }

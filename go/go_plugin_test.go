@@ -1,7 +1,7 @@
 // +build linux freebsd darwin
 // go plugin doesn't support windows
 
-package pluginInternal
+package hrpPlugin
 
 import (
 	"fmt"
@@ -16,7 +16,7 @@ func buildGoPlugin() {
 	fmt.Println("[setup] build go plugin")
 	// flag -race is necessary in order to be consistent with go test
 	cmd := exec.Command("go", "build", "-buildmode=plugin", "-race",
-		"-o=debugtalk.so", "../../examples/plugin/debugtalk.go")
+		"-o=debugtalk.so", "examples/debugtalk.go")
 	if err := cmd.Run(); err != nil {
 		panic(err)
 	}
@@ -25,45 +25,6 @@ func buildGoPlugin() {
 func removeGoPlugin() {
 	fmt.Println("[teardown] remove go plugin")
 	os.Remove("debugtalk.so")
-}
-
-func TestLocatePlugin(t *testing.T) {
-	buildGoPlugin()
-	defer removeGoPlugin()
-
-	_, err := locateFile("../", goPluginFile)
-	if !assert.Error(t, err) {
-		t.Fail()
-	}
-
-	_, err = locateFile("", goPluginFile)
-	if !assert.Error(t, err) {
-		t.Fail()
-	}
-
-	startPath := "debugtalk.so"
-	_, err = locateFile(startPath, goPluginFile)
-	if !assert.Nil(t, err) {
-		t.Fail()
-	}
-
-	startPath = "call.go"
-	_, err = locateFile(startPath, goPluginFile)
-	if !assert.Nil(t, err) {
-		t.Fail()
-	}
-
-	startPath = "."
-	_, err = locateFile(startPath, goPluginFile)
-	if !assert.Nil(t, err) {
-		t.Fail()
-	}
-
-	startPath = "/abc"
-	_, err = locateFile(startPath, goPluginFile)
-	if !assert.Error(t, err) {
-		t.Fail()
-	}
 }
 
 func TestCallPluginFunction(t *testing.T) {
