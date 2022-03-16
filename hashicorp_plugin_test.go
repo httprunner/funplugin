@@ -36,7 +36,7 @@ func TestHashicorpPlugin(t *testing.T) {
 	defer plugin1.Quit()
 	plugins = append(plugins, plugin1)
 
-	plugin2, err := Init("python/examples/debugtalk.py", false)
+	plugin2, err := Init("funppy/examples/debugtalk.py", false)
 	if err != nil {
 		t.Fatal(err)
 	}

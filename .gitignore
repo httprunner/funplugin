@@ -29,3 +29,4 @@ debugtalk.so
 .venv
 __pycache__
 .pyc
+dist

@@ -1,11 +1,7 @@
 import logging
-import sys
-import os
 from typing import List
 
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-
-import plugin
+import funppy
 
 
 def sum(*args):
@@ -48,13 +44,12 @@ def teardown_hook_example(name):
 
 
 if __name__ == '__main__':
-    plugin.register("sum", sum)
-    plugin.register("sum_ints", sum_ints)
-    plugin.register("concatenate", concatenate)
-    plugin.register("sum_two_int", sum_two_int)
-    plugin.register("sum_two_string", sum_two_string)
-    plugin.register("sum_strings", sum_strings)
-    plugin.register("setup_hook_example", setup_hook_example)
-    plugin.register("teardown_hook_example", teardown_hook_example)
-
-    plugin.serve()
+    funppy.register("sum", sum)
+    funppy.register("sum_ints", sum_ints)
+    funppy.register("concatenate", concatenate)
+    funppy.register("sum_two_int", sum_two_int)
+    funppy.register("sum_two_string", sum_two_string)
+    funppy.register("sum_strings", sum_strings)
+    funppy.register("setup_hook_example", setup_hook_example)
+    funppy.register("teardown_hook_example", teardown_hook_example)
+    funppy.serve()
