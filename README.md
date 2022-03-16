@@ -1,207 +1,93 @@
-# Func-Plugin
+# FunPlugin
 
-[![Go Reference](https://pkg.go.dev/badge/github.com/httprunner/func-plugin.svg)](https://pkg.go.dev/github.com/httprunner/func-plugin)
-[![Github Actions](https://github.com/httprunner/func-plugin/actions/workflows/unittest.yml/badge.svg)](https://github.com/httprunner/func-plugin/actions)
-[![codecov](https://codecov.io/gh/httprunner/func-plugin/branch/main/graph/badge.svg?token=DW3K2R1PNC)](https://codecov.io/gh/httprunner/func-plugin)
-[![Go Report Card](https://goreportcard.com/badge/github.com/httprunner/func-plugin)](https://goreportcard.com/report/github.com/httprunner/func-plugin)
+[![Go Reference](https://pkg.go.dev/badge/github.com/httprunner/funplugin.svg)](https://pkg.go.dev/github.com/httprunner/funplugin)
+[![Github Actions](https://github.com/httprunner/funplugin/actions/workflows/unittest.yml/badge.svg)](https://github.com/httprunner/funplugin/actions)
+[![codecov](https://codecov.io/gh/httprunner/funplugin/branch/main/graph/badge.svg?token=DW3K2R1PNC)](https://codecov.io/gh/httprunner/funplugin)
+[![Go Report Card](https://goreportcard.com/badge/github.com/httprunner/funplugin)](https://goreportcard.com/report/github.com/httprunner/funplugin)
 
-When you need to do some dynamic calculations or custom logic processing in testcases, you need to use the plugin function mechanism.
+## What is FunPlugin?
 
-HttpRunner+ supports both [hashicorp plugin] and [go plugin] to create and call custom functions.
+`FunPlugin` is short for function plugin, and I hope you can have fun using this plugin too.
 
-## hashicorp plugin
+This plugin project comes from the requirements of [HttpRunner+], because we need to implement some dynamic calculations or custom logic processing in YAML/JSON test cases. If you have used [HttpRunner] before, you must be impressed by `debugtalk.py`, which allows us to customize functions very easily and reference them in plain text test cases.
 
-It is recommended to use [hashicorp plugin] in most cases.
+As the HttpRunner project evolves, we expect users to have more choices besides Python when writing custom functions, such as Golang, Java, Node, C++, C#, etc.
 
-### create plugin functions
+`FunPlugin` achieves this goal well and grows into an independent project that not only serves HttpRunner+, but can also be easily integrated into other golang projects.
 
-Firstly, you need to define your plugin functions. The functions can be very flexible, only the following restrictions should be complied with.
+## How to use FunPlugin?
 
-- function should return at most one value and one error.
-- `Register()` and `Serve()` must be called to register plugin functions and start a plugin server process in `main()`.
+`FunPlugin` is mainly based on [hashicorp plugin], which is a golang plugin system over RPC. It supports serving plugins via `gRPC`, which means plugins can be written in any language. You can find the official programming languages supported by grpc [here][grpc-lang].
 
-Here is some plugin functions as example.
+Integrating `FunPlugin` is very simple. You only need to focus on two parts.
 
-```go
-package main
+- client side: integrate FunPlugin into your golang project, call plugin functions at will.
+- plugin side: write plugin functions in your favorite language and build them to plugin binary
 
-import (
-	"fmt"
+### client call
 
-	plugin "github.com/httprunner/func-plugin/go"
-)
+FunPlugin has a very concise golang API that can be easily integrated into golang projects.
 
-func SumTwoInt(a, b int) int {
-	return a + b
-}
-
-func SumInts(args ...int) int {
-	var sum int
-	for _, arg := range args {
-		sum += arg
-	}
-	return sum
-}
-
-func Sum(args ...interface{}) (interface{}, error) {
-	var sum float64
-	for _, arg := range args {
-		switch v := arg.(type) {
-		case int:
-			sum += float64(v)
-		case float64:
-			sum += v
-		default:
-			return nil, fmt.Errorf("unexpected type: %T", arg)
-		}
-	}
-	return sum, nil
-}
-
-func main() {
-	plugin.Register("sum_ints", SumInts)
-	plugin.Register("sum_two_int", SumTwoInt)
-	plugin.Register("sum", Sum)
-	plugin.Serve()
-}
-```
-
-You can get more examples at [examples/plugin/]
-
-### build plugin
-
-Secondly, you can build your hashicorp plugin to binary file `debugtalk.bin`. The name of `debugtalk.bin` is by convention and should not be changed.
-
-```bash
-$ go build -o examples/debugtalk.bin examples/plugin/hashicorp.go examples/plugin/debugtalk.go
-```
-
-It is recommended to place the `debugtalk.bin` file in your project root folder, or you can put it in the parent folder of the target testcase file. HttpRunner+ will search `debugtalk.bin` upward recursively until current working directory or system root dir.
-
-### use plugin functions
-
-Then, you can call your defined plugin function in your `YAML/JSON` testcase at any position.
-
-```json
-{
-    "name": "get with params",
-    "variables": {
-        "a": "${sum_two_int(1,6)}",
-        "b": "${sum_ints(1,2,3)}",
-        "c": "${sum(1, 2.3, 4)}",
-    },
-    "request": {
-        "method": "GET",
-        "url": "/get",
-        "params": {
-            "foo1": "$c",
-            "foo2": "${max($a, $b)}"
-        },
-        "headers": {
-            "User-Agent": "HttpRunnerPlus"
-        }
-    }
-}
-```
-
-### rpc vs. gRPC
-
-HttpRunner+ has both supported `net/rpc` and `gRPC` in [hashicorp plugin]. It is recommended to use `gRPC` and this is the default choice.
-
-If you want to run plugin in `net/rpc` mode, you can set an environment variable `HRP_PLUGIN_TYPE=rpc`.
-
-```bash
-$ export HRP_PLUGIN_TYPE=rpc
-$ hrp run examples/demo.json
-$ hrp boom examples/demo.json
-```
-
-## go plugin
-
-The golang official plugin is only supported on Linux, FreeBSD, and macOS. And this solution also has many drawbacks.
-
-### create plugin functions
-
-Firstly, you need to define your plugin functions. The functions can be very flexible, only the following restrictions should be complied with.
-
-- plugin package name must be `main`.
-- function names must be capitalized.
-- function should return at most one value and one error.
-
-Here is some plugin functions as example.
+1, use `Init` to initialize plugin via plugin path.
 
 ```go
-package main
+func Init(path string, logOn bool) (plugin IPlugin, err error)
+```
 
-func SumTwoInt(a, b int) int {
-	return a + b
-}
+- path: built plugin file path
+- logOn: whether print logs in plugin functions
 
-func SumInts(args ...int) int {
-	var sum int
-	for _, arg := range args {
-		sum += arg
-	}
-	return sum
-}
+2, call plugin API to deal with plugin functions.
 
-func Sum(args ...interface{}) (interface{}, error) {
-	var sum float64
-	for _, arg := range args {
-		switch v := arg.(type) {
-		case int:
-			sum += float64(v)
-		case float64:
-			sum += v
-		default:
-			return nil, fmt.Errorf("unexpected type: %T", arg)
-		}
-	}
-	return sum, nil
+If the specified plugin path is valid, you will get a plugin instance conforming to the `IPlugin` interface.
+
+```go
+type IPlugin interface {
+	Type() string
+	Has(funcName string) bool
+	Call(funcName string, args ...interface{}) (interface{}, error)
+	Quit() error
 }
 ```
 
-You can get more examples at [examples/plugin/debugtalk.go]
+- Type: returns plugin type
+- Has: check if plugin has a function
+- Call: call function with function name and arguments
+- Quit: quit plugin
 
-### build plugin
+You can reference [hashicorp_plugin_test.go] and [go_plugin_test.go] as examples.
 
-Then you can build your go plugin with `-buildmode=plugin` flag to binary file `debugtalk.so`. The name of `debugtalk.so` is by convention and should not be changed.
+### plugin server
 
-```bash
-$ go build -buildmode=plugin -o=examples/debugtalk.so examples/plugin/debugtalk.go
-```
+In `RPC` architecture, plugins can be considered as servers. You can write plugin functions in your favorite language and then build them to a binary file. When the client `Init` the plugin file path, it starts the plugin as a server and they can then communicates via RPC.
 
-It is recommended to place the `debugtalk.so` file in your project root folder, or you can put it in the parent folder of the target testcase file. HttpRunner+ will search `debugtalk.so` upward recursively until current working directory or system root dir.
+Currently, `FunPlugin` supports 3 different plugins via RPC. You can check their documentation for more details.
 
-### use plugin functions
+- [x] [Golang plugin over gRPC][go-grpc-plugin], built as `debugtalk.bin` (recommended)
+- [x] [Golang plugin over net/rpc][go-rpc-plugin], built as `debugtalk.bin`
+- [x] [Python plugin over gRPC][python-grpc-plugin], no need to build, just name it with `debugtalk.py`
 
-Then, you can call your defined plugin function in your `YAML/JSON` testcase at any position.
+You are welcome to contribute more plugins in other languages.
 
-```json
-{
-    "name": "get with params",
-    "variables": {
-        "a": "${SumTwoInt(1,6)}",
-        "b": "${SumInts(1,2,3)}",
-        "c": "${Sum(1, 2.3, 4)}",
-    },
-    "request": {
-        "method": "GET",
-        "url": "/get",
-        "params": {
-            "foo1": "$c",
-            "foo2": "${max($a, $b)}"
-        },
-        "headers": {
-            "User-Agent": "HttpRunnerPlus"
-        }
-    }
-}
-```
+- [ ] Java plugin over gRPC
+- [ ] Node plugin over gRPC
+- [ ] C++ plugin over gRPC
+- [ ] C# plugin over gRPC
+- [ ] [etc.][grpc-lang]
 
-Notice: you should use the original function name.
+Finally, `FunPlugin` also supports writing plugin function with the official [go plugin]. However, this solution has a number of limitations. You can check this [document][go-plugin] for more details.
 
+
+[HttpRunner+]: https://github.com/httprunner/hrp
+[HttpRunner]: https://github.com/httprunner/httprunner
 [hashicorp plugin]: https://github.com/hashicorp/go-plugin
+[grpc-lang]: https://www.grpc.io/docs/languages/
 [go plugin]: https://pkg.go.dev/plugin
 [examples/plugin/]: ../examples/plugin/
 [examples/plugin/debugtalk.go]: ../examples/plugin/debugtalk.go
+[hashicorp_plugin_test.go]: hashicorp_plugin_test.go
+[go_plugin_test.go]: go_plugin_test.go
+[go-grpc-plugin]: docs/go-grpc-plugin.md
+[go-rpc-plugin]: docs/go-rpc-plugin.md
+[python-grpc-plugin]: docs/python-grpc-plugin.md
+[go-plugin]: docs/go-plugin.md

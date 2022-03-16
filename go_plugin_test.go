@@ -16,7 +16,7 @@ func buildGoPlugin() {
 	fmt.Println("[setup] build go plugin")
 	// flag -race is necessary in order to be consistent with go test
 	cmd := exec.Command("go", "build", "-buildmode=plugin", "-race",
-		"-o=debugtalk.so", "go/examples/debugtalk.go")
+		"-o=debugtalk.so", "fungo/examples/debugtalk.go")
 	if err := cmd.Run(); err != nil {
 		panic(err)
 	}

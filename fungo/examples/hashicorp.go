@@ -14,5 +14,8 @@ func main() {
 	fungo.Register("concatenate", Concatenate)
 	fungo.Register("setup_hook_example", SetupHookExample)
 	fungo.Register("teardown_hook_example", TeardownHookExample)
+
+	// if you want to run golang plugin over net/rpc, comment out the following line
+	// os.Setenv("HRP_PLUGIN_TYPE", "rpc")
 	fungo.Serve()
 }
