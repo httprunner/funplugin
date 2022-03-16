@@ -1,4 +1,4 @@
-package funcGoPlugin
+package fungo
 
 import (
 	"context"
@@ -8,7 +8,7 @@ import (
 	"github.com/rs/zerolog/log"
 	"google.golang.org/grpc"
 
-	"github.com/httprunner/funplugin/go/protoGen"
+	"github.com/httprunner/funplugin/fungo/protoGen"
 	"github.com/httprunner/funplugin/shared"
 	jsoniter "github.com/json-iterator/go"
 )

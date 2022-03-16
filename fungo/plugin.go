@@ -1,4 +1,4 @@
-package funcGoPlugin
+package fungo
 
 import (
 	"fmt"

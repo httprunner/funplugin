@@ -12,8 +12,8 @@ import (
 func buildHashicorpGoPlugin() {
 	log.Info().Msg("[init] build hashicorp go plugin")
 	cmd := exec.Command("go", "build",
-		"-o", "go/examples/debugtalk.bin",
-		"go/examples/hashicorp.go", "go/examples/debugtalk.go")
+		"-o", "fungo/examples/debugtalk.bin",
+		"fungo/examples/hashicorp.go", "fungo/examples/debugtalk.go")
 	if err := cmd.Run(); err != nil {
 		panic(err)
 	}
@@ -21,7 +21,7 @@ func buildHashicorpGoPlugin() {
 
 func removeHashicorpGoPlugin() {
 	log.Info().Msg("[teardown] remove hashicorp plugin")
-	os.Remove("examples/debugtalk.bin")
+	os.Remove("fungo/examples/debugtalk.bin")
 }
 
 func TestHashicorpPlugin(t *testing.T) {
@@ -29,7 +29,7 @@ func TestHashicorpPlugin(t *testing.T) {
 	defer removeHashicorpGoPlugin()
 
 	var plugins []IPlugin
-	plugin1, err := Init("go/examples/debugtalk.bin", false)
+	plugin1, err := Init("fungo/examples/debugtalk.bin", false)
 	if err != nil {
 		t.Fatal(err)
 	}
