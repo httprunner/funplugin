@@ -1,4 +1,4 @@
-package funcPlugin
+package funplugin
 
 import (
 	"os"

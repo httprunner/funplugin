@@ -1,7 +1,7 @@
 // +build linux freebsd darwin
 // go plugin doesn't support windows
 
-package funcPlugin
+package funplugin
 
 import (
 	"fmt"
@@ -40,7 +40,7 @@ func TestCallPluginFunction(t *testing.T) {
 		t.Fail()
 	}
 
-	// call function without arguments
+	// call function with arguments
 	result, err := plugin.Call("Concatenate", "1", 2, "3.14")
 	if !assert.NoError(t, err) {
 		t.Fail()

@@ -1,4 +1,4 @@
-package funcPlugin
+package funplugin
 
 import (
 	"fmt"
@@ -8,7 +8,7 @@ import (
 
 	"github.com/rs/zerolog/log"
 
-	"github.com/httprunner/func-plugin/shared"
+	"github.com/httprunner/funplugin/shared"
 )
 
 // goPlugin implements golang official plugin

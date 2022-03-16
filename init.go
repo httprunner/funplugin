@@ -1,7 +1,7 @@
-package funcPlugin
+package funplugin
 
 import (
-	"github.com/httprunner/func-plugin/shared"
+	"github.com/httprunner/funplugin/shared"
 )
 
 type IPlugin interface {

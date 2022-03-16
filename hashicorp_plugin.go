@@ -1,4 +1,4 @@
-package funcPlugin
+package funplugin
 
 import (
 	"fmt"
@@ -11,8 +11,8 @@ import (
 	"github.com/pkg/errors"
 	"github.com/rs/zerolog/log"
 
-	funcGoPlugin "github.com/httprunner/func-plugin/go"
-	"github.com/httprunner/func-plugin/shared"
+	funcGoPlugin "github.com/httprunner/funplugin/go"
+	"github.com/httprunner/funplugin/shared"
 )
 
 // hashicorpPlugin implements hashicorp/go-plugin

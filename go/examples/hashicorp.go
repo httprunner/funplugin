@@ -1,7 +1,7 @@
 package main
 
 import (
-	plugin "github.com/httprunner/func-plugin/go"
+	plugin "github.com/httprunner/funplugin/go"
 )
 
 // register functions and build to plugin binary
