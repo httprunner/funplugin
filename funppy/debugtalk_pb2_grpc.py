@@ -2,7 +2,7 @@
 """Client and server classes corresponding to protobuf-defined services."""
 import grpc
 
-import debugtalk_pb2 as debugtalk__pb2
+from funppy import debugtalk_pb2 as debugtalk__pb2
 
 
 class DebugTalkStub(object):

@@ -7,8 +7,8 @@ from typing import Callable
 
 import grpc
 
-import debugtalk_pb2
-import debugtalk_pb2_grpc
+from funppy import debugtalk_pb2
+from funppy import debugtalk_pb2_grpc
 
 __all__ = ["register", "serve"]
 
