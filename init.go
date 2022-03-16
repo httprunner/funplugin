@@ -5,13 +5,13 @@ import (
 )
 
 type IPlugin interface {
-	Init(path string) error                                         // init plugin
 	Type() string                                                   // get plugin type
 	Has(funcName string) bool                                       // check if plugin has function
 	Call(funcName string, args ...interface{}) (interface{}, error) // call function
 	Quit() error                                                    // quit plugin
 }
 
+// Init initializes plugin with plugin path
 func Init(path string, logOn bool) (plugin IPlugin, err error) {
 	if path == "" {
 		return nil, nil
@@ -30,20 +30,14 @@ func Init(path string, logOn bool) (plugin IPlugin, err error) {
 	}
 	if err == nil {
 		// found hashicorp go/python plugin file
-		plugin = &hashicorpPlugin{
-			logOn: logOn,
-		}
-		err = plugin.Init(pluginPath)
-		return plugin, err
+		return newHashicorpPlugin(pluginPath, logOn)
 	}
 
 	// locate go plugin file
 	pluginPath, err = shared.LocateFile(path, shared.GoPluginFile)
 	if err == nil {
 		// found go plugin file
-		plugin = &goPlugin{}
-		err = plugin.Init(pluginPath)
-		return plugin, err
+		return newGoPlugin(pluginPath)
 	}
 
 	// plugin not found

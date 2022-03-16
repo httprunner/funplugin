@@ -20,11 +20,12 @@ type hashicorpPlugin struct {
 	client          *plugin.Client
 	pluginType      string
 	funcCaller      shared.IFuncCaller
-	logOn           bool            // turn on plugin log
 	cachedFunctions map[string]bool // cache loaded functions to improve performance
 }
 
-func (p *hashicorpPlugin) Init(path string) error {
+func newHashicorpPlugin(path string, logOn bool) (*hashicorpPlugin, error) {
+	p := &hashicorpPlugin{}
+
 	pluginType := os.Getenv(shared.PluginTypeEnvName)
 	if pluginType == "rpc" {
 		p.pluginType = pluginType
@@ -38,7 +39,8 @@ func (p *hashicorpPlugin) Init(path string) error {
 		Name:   pluginName,
 		Output: os.Stdout,
 	}
-	if p.logOn {
+	if logOn {
+		// turn on plugin log
 		loggerOptions.Level = hclog.Debug
 	} else {
 		loggerOptions.Level = hclog.Info
@@ -73,13 +75,13 @@ func (p *hashicorpPlugin) Init(path string) error {
 	// Connect via RPC/gRPC
 	rpcClient, err := p.client.Client()
 	if err != nil {
-		return errors.Wrap(err, fmt.Sprintf("connect %s plugin failed", p.pluginType))
+		return nil, errors.Wrap(err, fmt.Sprintf("connect %s plugin failed", p.pluginType))
 	}
 
 	// Request the plugin
 	raw, err := rpcClient.Dispense(pluginName)
 	if err != nil {
-		return errors.Wrap(err, fmt.Sprintf("request %s plugin failed", p.pluginType))
+		return nil, errors.Wrap(err, fmt.Sprintf("request %s plugin failed", p.pluginType))
 	}
 
 	// We should have a Function now! This feels like a normal interface
@@ -88,7 +90,8 @@ func (p *hashicorpPlugin) Init(path string) error {
 
 	p.cachedFunctions = make(map[string]bool)
 	log.Info().Str("path", path).Msg("load hashicorp go plugin success")
-	return nil
+
+	return p, nil
 }
 
 func (p *hashicorpPlugin) Type() string {

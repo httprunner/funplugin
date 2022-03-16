@@ -17,22 +17,24 @@ type goPlugin struct {
 	cachedFunctions map[string]reflect.Value // cache loaded functions to improve performance
 }
 
-func (p *goPlugin) Init(path string) error {
+func newGoPlugin(path string) (*goPlugin, error) {
 	if runtime.GOOS == "windows" {
 		log.Warn().Msg("go plugin does not support windows")
-		return fmt.Errorf("go plugin does not support windows")
+		return nil, fmt.Errorf("go plugin does not support windows")
 	}
 
-	var err error
-	p.Plugin, err = plugin.Open(path)
+	plg, err := plugin.Open(path)
 	if err != nil {
 		log.Error().Err(err).Str("path", path).Msg("load go plugin failed")
-		return err
+		return nil, err
 	}
 
-	p.cachedFunctions = make(map[string]reflect.Value)
 	log.Info().Str("path", path).Msg("load go plugin success")
-	return nil
+	p := &goPlugin{
+		Plugin:          plg,
+		cachedFunctions: make(map[string]reflect.Value),
+	}
+	return p, nil
 }
 
 func (p *goPlugin) Type() string {
