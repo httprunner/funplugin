@@ -50,6 +50,12 @@ Install gRPC tools:
 $ pip3 install grpcio-tools
 ```
 
+Or you can just install all dependencies with `poetry`.
+
+```bash
+$ poetry install
+```
+
 ### Generate gRPC code
 
 ```bash

@@ -21,7 +21,7 @@ jobs:
         with:
           go-version: ${{ matrix.go-version }}
       - name: Install Python plugin dependencies
-        run: python3 -m pip install grpcio
+        run: python3 -m pip install grpcio grpcio-tools
       - name: Checkout code
         uses: actions/checkout@v2
       - name: Run coverage
