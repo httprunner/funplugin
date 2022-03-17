@@ -59,10 +59,19 @@ $ poetry install
 ### Generate gRPC code
 
 ```bash
-$ python3 -m grpc_tools.protoc -I proto --python_out=python/ --grpc_python_out=python/ proto/debugtalk.proto
+$ python3 -m grpc_tools.protoc -I=proto --python_out=funppy/ --grpc_python_out=funppy/ proto/debugtalk.proto
 ```
 
 This will generate two python files in `python` folder:
 
 - debugtalk_pb2.py
 - debugtalk_pb2_grpc.py
+
+We need to modify `debugtalk_pb2_grpc.py` from `import debugtalk_pb2 as debugtalk__pb2` to `from funppy import debugtalk_pb2 as debugtalk__pb2`.
+
+Or we can generate target files like this:
+
+```bash
+$ cp proto/debugtalk.proto funppy/debugtalk.proto
+$ python3 -m grpc_tools.protoc -I=. --python_out=. --grpc_python_out=. funppy/debugtalk.proto
+```
