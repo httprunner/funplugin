@@ -2,8 +2,12 @@ package shared
 
 import (
 	"fmt"
+	"os/exec"
+	"path/filepath"
 	"reflect"
+	"strings"
 
+	"github.com/pkg/errors"
 	"github.com/rs/zerolog/log"
 )
 
@@ -100,4 +104,36 @@ func call(fn reflect.Value, args []reflect.Value) (interface{}, error) {
 		err := fmt.Errorf("function should return at most 2 values")
 		return nil, err
 	}
+}
+
+// PreparePython3Venv prepares python3 venv for hashicorp python plugin
+// created .venv directory will be located besides the plugin file path
+func PreparePython3Venv(path string) (python3 string, err error) {
+	projectDir := filepath.Dir(path)
+	if err := ExecCommand(exec.Command("python3", "--version"), projectDir); err != nil {
+		return "", errors.Wrap(err, "python3 not found")
+	}
+	if err := ExecCommand(exec.Command("python3", "-m", "venv", ".venv"), projectDir); err != nil {
+		return "", errors.Wrap(err, "create python3 venv failed")
+	}
+	python3, _ = filepath.Abs(filepath.Join(projectDir, ".venv", "bin", "python3"))
+	pip3InstallCmd := exec.Command(python3, "-m",
+		"pip", "--disable-pip-version-check", "install", "funppy")
+	if err := ExecCommand(pip3InstallCmd, projectDir); err != nil {
+		return "", errors.Wrap(err, "install funppy failed")
+	}
+	return python3, nil
+}
+
+func ExecCommand(cmd *exec.Cmd, cwd string) error {
+	log.Info().Str("cmd", cmd.String()).Str("cwd", cwd).Msg("exec command")
+	cmd.Dir = cwd
+	output, err := cmd.CombinedOutput()
+	out := strings.TrimSpace(string(output))
+	if err != nil {
+		log.Error().Err(err).Str("output", out).Msg("exec command failed")
+	} else if len(out) != 0 {
+		log.Info().Str("output", out).Msg("exec command success")
+	}
+	return err
 }
