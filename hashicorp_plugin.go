@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
-	"path/filepath"
 
 	"github.com/hashicorp/go-hclog"
 	"github.com/hashicorp/go-plugin"
@@ -21,22 +20,20 @@ type hashicorpPlugin struct {
 	pluginType      string
 	funcCaller      shared.IFuncCaller
 	cachedFunctions map[string]bool // cache loaded functions to improve performance
+	python3         string          // python3 path for python plugin
 }
 
-func newHashicorpPlugin(path string, logOn bool) (*hashicorpPlugin, error) {
+func newHashicorpPlugin(path string, logOn bool, python3 string) (*hashicorpPlugin, error) {
 	p := &hashicorpPlugin{}
 
-	pluginType := os.Getenv(shared.PluginTypeEnvName)
-	if pluginType == "rpc" {
-		p.pluginType = pluginType
-	} else {
+	p.pluginType = os.Getenv(shared.PluginTypeEnvName)
+	if p.pluginType != "rpc" {
 		p.pluginType = "grpc" // default
 	}
-	pluginName := shared.PluginName + "_" + p.pluginType
 
 	// logger
 	loggerOptions := &hclog.LoggerOptions{
-		Name:   pluginName,
+		Name:   p.pluginType,
 		Output: os.Stdout,
 	}
 	if logOn {
@@ -48,9 +45,10 @@ func newHashicorpPlugin(path string, logOn bool) (*hashicorpPlugin, error) {
 
 	// cmd
 	var cmd *exec.Cmd
-	if filepath.Base(path) == shared.HashicorpPyPluginFile {
+	if python3 != "" {
+		p.python3 = python3
 		// hashicorp python plugin
-		cmd = exec.Command("python3", path)
+		cmd = exec.Command(python3, path)
 	} else {
 		// go plugin
 		cmd = exec.Command(path)
@@ -61,8 +59,8 @@ func newHashicorpPlugin(path string, logOn bool) (*hashicorpPlugin, error) {
 	p.client = plugin.NewClient(&plugin.ClientConfig{
 		HandshakeConfig: shared.HandshakeConfig,
 		Plugins: map[string]plugin.Plugin{
-			shared.PluginName + "_rpc":  &fungo.RPCPlugin{},
-			shared.PluginName + "_grpc": &fungo.GRPCPlugin{},
+			"rpc":  &fungo.RPCPlugin{},
+			"grpc": &fungo.GRPCPlugin{},
 		},
 		Cmd:    cmd,
 		Logger: hclog.New(loggerOptions),
@@ -79,7 +77,7 @@ func newHashicorpPlugin(path string, logOn bool) (*hashicorpPlugin, error) {
 	}
 
 	// Request the plugin
-	raw, err := rpcClient.Dispense(pluginName)
+	raw, err := rpcClient.Dispense(p.pluginType)
 	if err != nil {
 		return nil, errors.Wrap(err, fmt.Sprintf("request %s plugin failed", p.pluginType))
 	}

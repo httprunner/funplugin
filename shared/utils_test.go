@@ -206,33 +206,3 @@ func TestCallFuncAbnormal(t *testing.T) {
 	}
 
 }
-
-func TestLocatePlugin(t *testing.T) {
-	_, err := LocateFile("../", GoPluginFile)
-	if !assert.Error(t, err) {
-		t.Fail()
-	}
-
-	_, err = LocateFile("", GoPluginFile)
-	if !assert.Error(t, err) {
-		t.Fail()
-	}
-
-	startPath := "utils.go"
-	_, err = LocateFile(startPath, "utils.go")
-	if !assert.Nil(t, err) {
-		t.Fail()
-	}
-
-	startPath = "."
-	_, err = LocateFile(startPath, "utils.go")
-	if !assert.Nil(t, err) {
-		t.Fail()
-	}
-
-	startPath = "/abc"
-	_, err = LocateFile(startPath, "utils.go")
-	if !assert.Error(t, err) {
-		t.Fail()
-	}
-}

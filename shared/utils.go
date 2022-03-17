@@ -2,8 +2,6 @@ package shared
 
 import (
 	"fmt"
-	"os"
-	"path/filepath"
 	"reflect"
 
 	"github.com/rs/zerolog/log"
@@ -102,41 +100,4 @@ func call(fn reflect.Value, args []reflect.Value) (interface{}, error) {
 		err := fmt.Errorf("function should return at most 2 values")
 		return nil, err
 	}
-}
-
-// LocateFile searches destFile upward recursively until current
-// working directory or system root dir.
-func LocateFile(startPath string, destFile string) (string, error) {
-	stat, err := os.Stat(startPath)
-	if os.IsNotExist(err) {
-		return "", err
-	}
-
-	var startDir string
-	if stat.IsDir() {
-		startDir = startPath
-	} else {
-		startDir = filepath.Dir(startPath)
-	}
-	startDir, _ = filepath.Abs(startDir)
-
-	// convention over configuration
-	pluginPath := filepath.Join(startDir, destFile)
-	if _, err := os.Stat(pluginPath); err == nil {
-		return pluginPath, nil
-	}
-
-	// current working directory
-	cwd, _ := os.Getwd()
-	if startDir == cwd {
-		return "", fmt.Errorf("searched to CWD, plugin file not found")
-	}
-
-	// system root dir
-	parentDir, _ := filepath.Abs(filepath.Dir(startDir))
-	if parentDir == startDir {
-		return "", fmt.Errorf("searched to system root dir, plugin file not found")
-	}
-
-	return LocateFile(parentDir, destFile)
 }

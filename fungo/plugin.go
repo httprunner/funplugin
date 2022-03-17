@@ -53,7 +53,7 @@ func Register(funcName string, fn interface{}) {
 
 // serveRPC starts a plugin server process in RPC mode.
 func serveRPC() {
-	rpcPluginName := shared.PluginName + "_rpc"
+	rpcPluginName := "rpc"
 	log.Info().Msg("start plugin server in RPC mode")
 	funcPlugin := &functionPlugin{
 		logger: hclog.New(&hclog.LoggerOptions{
@@ -75,7 +75,7 @@ func serveRPC() {
 
 // serveGRPC starts a plugin server process in gRPC mode.
 func serveGRPC() {
-	grpcPluginName := shared.PluginName + "_grpc"
+	grpcPluginName := "grpc"
 	log.Info().Msg("start plugin server in gRPC mode")
 	funcPlugin := &functionPlugin{
 		logger: hclog.New(&hclog.LoggerOptions{
