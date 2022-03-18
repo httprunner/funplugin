@@ -22,8 +22,8 @@ site/
 output/
 
 # built plugins
-debugtalk.bin
-debugtalk.so
+.bin
+.so
 
 # python files
 .venv

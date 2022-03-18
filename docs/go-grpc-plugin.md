@@ -68,15 +68,15 @@ You can get more examples at [fungo/examples/].
 
 ## build plugin
 
-Once the plugin functions are ready, you can build them into the binary file `debugtalk.bin`. The name of `debugtalk.bin` is by convention and should not be changed.
+Once the plugin functions are ready, you can build them into the binary file `xxx.bin`. The file suffix of `.bin` is by convention and should not be changed.
 
 ```bash
-$ go build -o fungo/examples/debugtalk.bin fungo/examples/hashicorp.go fungo/examples/debugtalk.go
+$ go build -o fungo/examples/xxx.bin fungo/examples/hashicorp.go fungo/examples/debugtalk.go
 ```
 
 ## use plugin functions
 
-Finally, you can use `Init` to initialize plugin via the `debugtalk.bin` path, and you can call the plugin API to handle plugin functionality.
+Finally, you can use `Init` to initialize plugin via the `xxx.bin` path, and you can call the plugin API to handle plugin functionality.
 
 
 [fungo/examples/]: ../fungo/examples/

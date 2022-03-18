@@ -48,15 +48,15 @@ You can get more examples at [fungo/examples/debugtalk.go]
 
 ## build plugin
 
-Then you can build your go plugin with `-buildmode=plugin` flag to binary file `debugtalk.so`. The name of `debugtalk.so` is by convention and should not be changed.
+Then you can build your go plugin with `-buildmode=plugin` flag to binary file `xxx.so`. The file suffix of `.so` is by convention and should not be changed.
 
 ```bash
-$ go build -buildmode=plugin -o=go/examples/debugtalk.so go/examples/debugtalk.go
+$ go build -buildmode=plugin -o=fungo/examples/xxx.so fungo/examples/debugtalk.go
 ```
 
 ## use plugin functions
 
-Finally, you can use `Init` to initialize plugin via the `debugtalk.so` path, and you can call the plugin API to handle plugin functionality.
+Finally, you can use `Init` to initialize plugin via the `xxx.so` path, and you can call the plugin API to handle plugin functionality.
 
 Notice: you should use the original function name.
 

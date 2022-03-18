@@ -31,11 +31,13 @@ FunPlugin has a very concise golang API that can be easily integrated into golan
 1, use `Init` to initialize plugin via plugin path.
 
 ```go
-func Init(path string, logOn bool) (plugin IPlugin, err error)
+func Init(path string, options ...Option) (plugin IPlugin, err error)
 ```
 
 - path: built plugin file path
-- logOn: whether print logs in plugin functions
+- options: specify extra plugin options
+  - WithLogOn(logOn bool): whether to print logs in plugin functions
+  - WithPython3(python3 string): specify custom python3 path
 
 2, call plugin API to deal with plugin functions.
 
@@ -63,9 +65,9 @@ In `RPC` architecture, plugins can be considered as servers. You can write plugi
 
 Currently, `FunPlugin` supports 3 different plugins via RPC. You can check their documentation for more details.
 
-- [x] [Golang plugin over gRPC][go-grpc-plugin], built as `debugtalk.bin` (recommended)
-- [x] [Golang plugin over net/rpc][go-rpc-plugin], built as `debugtalk.bin`
-- [x] [Python plugin over gRPC][python-grpc-plugin], no need to build, just name it with `debugtalk.py`
+- [x] [Golang plugin over gRPC][go-grpc-plugin], built as `xxx.bin` (recommended)
+- [x] [Golang plugin over net/rpc][go-rpc-plugin], built as `xxx.bin`
+- [x] [Python plugin over gRPC][python-grpc-plugin], no need to build, just name it with `xxx.py`
 
 You are welcome to contribute more plugins in other languages.
 

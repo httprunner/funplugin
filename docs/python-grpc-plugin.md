@@ -12,7 +12,6 @@ $ python3 -m pip install funppy
 
 Then you can write your plugin functions in python. The functions can be very flexible, only the following restrictions should be complied with.
 
-- file name must be `debugtalk.py`.
 - function should return at most one value and one error.
 - `funppy.register()` must be called to register plugin functions and `funppy.serve()` must be called to start a plugin server process.
 
@@ -52,11 +51,11 @@ You can get more examples at [funppy/examples/].
 
 ## build plugin
 
-Python plugins do not need to be complied, just make sure it is named `debugtalk.py` by convention and should not be changed.
+Python plugins do not need to be complied, just make sure its file suffix is `.py` by convention and should not be changed.
 
 ## use plugin functions
 
-Finally, you can use `Init` to initialize plugin via the `debugtalk.py` path, and you can call the plugin API to handle plugin functionality.
+Finally, you can use `Init` to initialize plugin via the `xxx.py` path, and you can call the plugin API to handle plugin functionality.
 
 
 [funppy/examples/]: ../funppy/examples/
