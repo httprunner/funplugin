@@ -5,6 +5,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"reflect"
+	"runtime"
 	"strings"
 
 	"github.com/pkg/errors"
@@ -113,10 +114,15 @@ func PreparePython3Venv(path string) (python3 string, err error) {
 	if err := ExecCommand(exec.Command("python3", "--version"), projectDir); err != nil {
 		return "", errors.Wrap(err, "python3 not found")
 	}
-	if err := ExecCommand(exec.Command("python3", "-m", "venv", ".venv"), projectDir); err != nil {
+	venvDir := ".venv"
+	if err := ExecCommand(exec.Command("python3", "-m", "venv", venvDir), projectDir); err != nil {
 		return "", errors.Wrap(err, "create python3 venv failed")
 	}
-	python3 = filepath.Join(projectDir, ".venv", "bin", "python3")
+	if runtime.GOOS == "windows" {
+		python3 = filepath.Join(projectDir, venvDir, "Scripts", "python3.exe")
+	} else {
+		python3 = filepath.Join(projectDir, venvDir, "bin", "python3")
+	}
 	pip3InstallCmd := exec.Command(python3, "-m",
 		"pip", "--disable-pip-version-check", "install", "funppy")
 	if err := ExecCommand(pip3InstallCmd, projectDir); err != nil {
