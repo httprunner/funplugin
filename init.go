@@ -16,22 +16,49 @@ type IPlugin interface {
 	Quit() error                                                    // quit plugin
 }
 
+type pluginOption struct {
+	logOn   bool
+	python3 string // python3 path with funppy dependency
+}
+
+type Option func(*pluginOption)
+
+func WithLogOn(logOn bool) Option {
+	return func(o *pluginOption) {
+		o.logOn = logOn
+	}
+}
+
+func WithPython3(python3 string) Option {
+	return func(o *pluginOption) {
+		o.python3 = python3
+	}
+}
+
 // Init initializes plugin with plugin path
-func Init(path string, logOn bool) (plugin IPlugin, err error) {
-	// priority: hashicorp plugin (debugtalk.bin > debugtalk.py) > go plugin (debugtalk.so)
+func Init(path string, options ...Option) (plugin IPlugin, err error) {
+	option := &pluginOption{}
+	for _, o := range options {
+		o(option)
+	}
+
+	// priority: hashicorp plugin > go plugin
 	ext := filepath.Ext(path)
 	switch ext {
 	case ".bin":
 		// found hashicorp go plugin file
-		return newHashicorpPlugin(path, logOn, "")
+		return newHashicorpPlugin(path, option)
 	case ".py":
 		// found hashicorp python plugin file
-		python3, err := shared.PreparePython3Venv(path)
-		if err != nil {
-			log.Error().Err(err).Msg("prepare python venv failed")
-			return nil, err
+		if option.python3 == "" {
+			python3, err := shared.PreparePython3Venv(path)
+			if err != nil {
+				log.Error().Err(err).Msg("prepare python venv failed")
+				return nil, err
+			}
+			option.python3 = python3
 		}
-		return newHashicorpPlugin(path, logOn, python3)
+		return newHashicorpPlugin(path, option)
 	case ".so":
 		// found go plugin file
 		return newGoPlugin(path)

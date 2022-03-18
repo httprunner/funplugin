@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"path/filepath"
 
 	"github.com/hashicorp/go-hclog"
 	"github.com/hashicorp/go-plugin"
@@ -17,26 +18,29 @@ import (
 // hashicorpPlugin implements hashicorp/go-plugin
 type hashicorpPlugin struct {
 	client          *plugin.Client
-	pluginType      string
+	rpcType         string // grpc or net/rpc
 	funcCaller      shared.IFuncCaller
 	cachedFunctions map[string]bool // cache loaded functions to improve performance
-	python3         string          // python3 path for python plugin
+	option          *pluginOption
 }
 
-func newHashicorpPlugin(path string, logOn bool, python3 string) (*hashicorpPlugin, error) {
-	p := &hashicorpPlugin{}
+func newHashicorpPlugin(path string, option *pluginOption) (*hashicorpPlugin, error) {
+	p := &hashicorpPlugin{
+		option: option,
+	}
 
-	p.pluginType = os.Getenv(shared.PluginTypeEnvName)
-	if p.pluginType != "rpc" {
-		p.pluginType = "grpc" // default
+	// plugin type, grpc or rpc
+	p.rpcType = os.Getenv(shared.PluginTypeEnvName)
+	if p.rpcType != "rpc" {
+		p.rpcType = "grpc" // default
 	}
 
 	// logger
 	loggerOptions := &hclog.LoggerOptions{
-		Name:   p.pluginType,
+		Name:   p.rpcType,
 		Output: os.Stdout,
 	}
-	if logOn {
+	if p.option.logOn {
 		// turn on plugin log
 		loggerOptions.Level = hclog.Debug
 	} else {
@@ -45,15 +49,14 @@ func newHashicorpPlugin(path string, logOn bool, python3 string) (*hashicorpPlug
 
 	// cmd
 	var cmd *exec.Cmd
-	if python3 != "" {
-		p.python3 = python3
+	if filepath.Ext(path) == ".py" {
 		// hashicorp python plugin
-		cmd = exec.Command(python3, path)
+		cmd = exec.Command(p.option.python3, path)
 	} else {
-		// go plugin
+		// hashicorp go plugin
 		cmd = exec.Command(path)
 	}
-	cmd.Env = append(os.Environ(), fmt.Sprintf("%s=%s", shared.PluginTypeEnvName, p.pluginType))
+	cmd.Env = append(os.Environ(), fmt.Sprintf("%s=%s", shared.PluginTypeEnvName, p.rpcType))
 
 	// launch the plugin process
 	p.client = plugin.NewClient(&plugin.ClientConfig{
@@ -73,13 +76,13 @@ func newHashicorpPlugin(path string, logOn bool, python3 string) (*hashicorpPlug
 	// Connect via RPC/gRPC
 	rpcClient, err := p.client.Client()
 	if err != nil {
-		return nil, errors.Wrap(err, fmt.Sprintf("connect %s plugin failed", p.pluginType))
+		return nil, errors.Wrap(err, fmt.Sprintf("connect %s plugin failed", p.rpcType))
 	}
 
 	// Request the plugin
-	raw, err := rpcClient.Dispense(p.pluginType)
+	raw, err := rpcClient.Dispense(p.rpcType)
 	if err != nil {
-		return nil, errors.Wrap(err, fmt.Sprintf("request %s plugin failed", p.pluginType))
+		return nil, errors.Wrap(err, fmt.Sprintf("request %s plugin failed", p.rpcType))
 	}
 
 	// We should have a Function now! This feels like a normal interface
@@ -93,7 +96,7 @@ func newHashicorpPlugin(path string, logOn bool, python3 string) (*hashicorpPlug
 }
 
 func (p *hashicorpPlugin) Type() string {
-	return fmt.Sprintf("hashicorp-%s", p.pluginType)
+	return fmt.Sprintf("hashicorp-%s", p.rpcType)
 }
 
 func (p *hashicorpPlugin) Has(funcName string) bool {

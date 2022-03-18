@@ -31,7 +31,7 @@ func TestCallPluginFunction(t *testing.T) {
 	buildGoPlugin()
 	defer removeGoPlugin()
 
-	plugin, err := Init("debugtalk.so", false)
+	plugin, err := Init("debugtalk.so")
 	if err != nil {
 		t.Fatal(err)
 	}

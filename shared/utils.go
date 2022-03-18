@@ -109,14 +109,14 @@ func call(fn reflect.Value, args []reflect.Value) (interface{}, error) {
 // PreparePython3Venv prepares python3 venv for hashicorp python plugin
 // created .venv directory will be located besides the plugin file path
 func PreparePython3Venv(path string) (python3 string, err error) {
-	projectDir := filepath.Dir(path)
+	projectDir, _ := filepath.Abs(filepath.Dir(path))
 	if err := ExecCommand(exec.Command("python3", "--version"), projectDir); err != nil {
 		return "", errors.Wrap(err, "python3 not found")
 	}
 	if err := ExecCommand(exec.Command("python3", "-m", "venv", ".venv"), projectDir); err != nil {
 		return "", errors.Wrap(err, "create python3 venv failed")
 	}
-	python3, _ = filepath.Abs(filepath.Join(projectDir, ".venv", "bin", "python3"))
+	python3 = filepath.Join(projectDir, ".venv", "bin", "python3")
 	pip3InstallCmd := exec.Command(python3, "-m",
 		"pip", "--disable-pip-version-check", "install", "funppy")
 	if err := ExecCommand(pip3InstallCmd, projectDir); err != nil {
