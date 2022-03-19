@@ -2,6 +2,7 @@ package shared
 
 import (
 	"fmt"
+	"os"
 	"os/exec"
 	"path/filepath"
 	"reflect"
@@ -114,17 +115,33 @@ func PreparePython3Venv(path string) (python3 string, err error) {
 	if err := ExecCommand(exec.Command("python3", "--version"), projectDir); err != nil {
 		return "", errors.Wrap(err, "python3 not found")
 	}
+
 	venvDir := ".venv"
-	if err := ExecCommand(exec.Command("python3", "-m", "venv", venvDir), projectDir); err != nil {
-		return "", errors.Wrap(err, "create python3 venv failed")
-	}
 	if runtime.GOOS == "windows" {
 		python3 = filepath.Join(projectDir, venvDir, "Scripts", "python3.exe")
 	} else {
 		python3 = filepath.Join(projectDir, venvDir, "bin", "python3")
 	}
+
+	// check if python .venv exists
+	if !isExecutableFileExists(python3) {
+		// create python .venv
+		if err := ExecCommand(exec.Command("python3", "-m", "venv", venvDir), projectDir); err != nil {
+			return "", errors.Wrap(err, "create python3 venv failed")
+		}
+	}
+
+	// check if funppy installed
+	pip3CheckCmd := exec.Command(python3, "-m",
+		"pip", "show", "funppy", "--quiet")
+	if err := ExecCommand(pip3CheckCmd, projectDir); err == nil {
+		// funppy is installed
+		return python3, nil
+	}
+
+	// install funppy
 	pip3InstallCmd := exec.Command(python3, "-m",
-		"pip", "--disable-pip-version-check", "install", "funppy")
+		"pip", "install", "funppy", "--quiet", "--disable-pip-version-check")
 	if err := ExecCommand(pip3InstallCmd, projectDir); err != nil {
 		return "", errors.Wrap(err, "install funppy failed")
 	}
@@ -142,4 +159,22 @@ func ExecCommand(cmd *exec.Cmd, cwd string) error {
 		log.Info().Str("output", out).Msg("exec command success")
 	}
 	return err
+}
+
+// isExecutableFileExists returns true if path exists and path is executable file
+func isExecutableFileExists(path string) bool {
+	info, err := os.Stat(path)
+	if err != nil {
+		// path not exists
+		return false
+	}
+
+	// path exists
+	if !info.Mode().IsRegular() {
+		// path is not regular file
+		return false
+	}
+
+	// file path is executable
+	return info.Mode().Perm()&0100 != 0
 }
