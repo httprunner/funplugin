@@ -112,47 +112,62 @@ func call(fn reflect.Value, args []reflect.Value) (interface{}, error) {
 // created .venv directory will be located besides the plugin file path
 func PreparePython3Venv(path string) (python3 string, err error) {
 	projectDir, _ := filepath.Abs(filepath.Dir(path))
-	if err := ExecCommand(exec.Command("python3", "--version"), projectDir); err != nil {
-		return "", errors.Wrap(err, "python3 not found")
-	}
-
-	venvDir := ".venv"
+	venvDir := filepath.Join(projectDir, ".venv")
 	if runtime.GOOS == "windows" {
-		python3 = filepath.Join(projectDir, venvDir, "Scripts", "python3.exe")
+		python3 = filepath.Join(venvDir, "Scripts", "python.exe")
 	} else {
-		python3 = filepath.Join(projectDir, venvDir, "bin", "python3")
+		python3 = filepath.Join(venvDir, "bin", "python")
 	}
 
-	// check if python .venv exists
-	if !isExecutableFileExists(python3) {
-		// create python .venv
+	defer func() {
+		if err == nil {
+			log.Info().Str("plugin", path).Msg("python3 venv is ready")
+		}
+	}()
+
+	// check if python3 venv is available
+	if err := exec.Command(python3, "--version").Run(); err != nil {
+		// python3 venv not available, create one
+		// check if system python3 is available
+		if err := execCommand("python3", "--version"); err != nil {
+			return "", errors.Wrap(err, "python3 not found")
+		}
+
+		// check if .venv exists
+		if _, err := os.Stat(venvDir); err == nil {
+			// .venv exists, remove first
+			if err := execCommand("rm", "-rf", venvDir); err != nil {
+				return "", errors.Wrap(err, "remove existed .venv failed")
+			}
+		}
+
+		// create python3 .venv
 		// notice: --symlinks should be specified for windows
 		// https://github.com/actions/virtual-environments/issues/2690
-		if err := ExecCommand(exec.Command("python3", "-m", "venv", "--symlinks", venvDir), projectDir); err != nil {
+		if err := execCommand("python3", "-m", "venv", "--symlinks", venvDir); err != nil {
 			return "", errors.Wrap(err, "create python3 venv failed")
 		}
 	}
 
 	// check if funppy installed
-	pip3CheckCmd := exec.Command(python3, "-m",
-		"pip", "show", "funppy", "--quiet")
-	if err := ExecCommand(pip3CheckCmd, projectDir); err == nil {
+	err = exec.Command(python3, "-m", "pip", "show", "funppy", "--quiet").Run()
+	if err == nil {
 		// funppy is installed
 		return python3, nil
 	}
 
 	// install funppy
-	pip3InstallCmd := exec.Command(python3, "-m",
+	err = execCommand(python3, "-m",
 		"pip", "install", "funppy", "--quiet", "--disable-pip-version-check")
-	if err := ExecCommand(pip3InstallCmd, projectDir); err != nil {
+	if err != nil {
 		return "", errors.Wrap(err, "install funppy failed")
 	}
 	return python3, nil
 }
 
-func ExecCommand(cmd *exec.Cmd, cwd string) error {
-	log.Info().Str("cmd", cmd.String()).Str("cwd", cwd).Msg("exec command")
-	cmd.Dir = cwd
+func execCommand(cmdName string, args ...string) error {
+	cmd := exec.Command(cmdName, args...)
+	log.Info().Str("cmd", cmd.String()).Msg("exec command")
 	output, err := cmd.CombinedOutput()
 	out := strings.TrimSpace(string(output))
 	if err != nil {
@@ -161,29 +176,4 @@ func ExecCommand(cmd *exec.Cmd, cwd string) error {
 		log.Info().Str("output", out).Msg("exec command success")
 	}
 	return err
-}
-
-// isExecutableFileExists returns true if path exists and path is executable file
-func isExecutableFileExists(path string) bool {
-	info, err := os.Stat(path)
-	if err != nil {
-		// path not exists
-		log.Warn().Str("path", path).Msg("path is not exists")
-		return false
-	}
-
-	// path exists
-	if !info.Mode().IsRegular() {
-		// path is not regular file
-		log.Warn().Str("path", path).Msg("path is not regular file")
-		return false
-	}
-
-	// file path is executable
-	if info.Mode().Perm()&0100 == 0 {
-		log.Warn().Str("path", path).Msg("path is not executable")
-		return false
-	}
-
-	return true
 }
