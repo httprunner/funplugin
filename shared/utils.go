@@ -126,7 +126,9 @@ func PreparePython3Venv(path string) (python3 string, err error) {
 	// check if python .venv exists
 	if !isExecutableFileExists(python3) {
 		// create python .venv
-		if err := ExecCommand(exec.Command("python3", "-m", "venv", venvDir), projectDir); err != nil {
+		// notice: --symlinks should be specified for windows
+		// https://github.com/actions/virtual-environments/issues/2690
+		if err := ExecCommand(exec.Command("python3", "-m", "venv", "--symlinks", venvDir), projectDir); err != nil {
 			return "", errors.Wrap(err, "create python3 venv failed")
 		}
 	}
