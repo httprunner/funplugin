@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
-	"path/filepath"
 
 	"github.com/hashicorp/go-hclog"
 	"github.com/hashicorp/go-plugin"
@@ -15,10 +14,21 @@ import (
 	"github.com/httprunner/funplugin/shared"
 )
 
+type rpcType string
+
+const (
+	rpcTypeRPC  rpcType = "rpc"  // go net/rpc
+	rpcTypeGRPC rpcType = "grpc" // default
+)
+
+func (t rpcType) String() string {
+	return string(t)
+}
+
 // hashicorpPlugin implements hashicorp/go-plugin
 type hashicorpPlugin struct {
 	client          *plugin.Client
-	rpcType         string // grpc or net/rpc
+	rpcType         rpcType
 	funcCaller      shared.IFuncCaller
 	cachedFunctions map[string]bool // cache loaded functions to improve performance
 	option          *pluginOption
@@ -30,14 +40,14 @@ func newHashicorpPlugin(path string, option *pluginOption) (*hashicorpPlugin, er
 	}
 
 	// plugin type, grpc or rpc
-	p.rpcType = os.Getenv(shared.PluginTypeEnvName)
-	if p.rpcType != "rpc" {
-		p.rpcType = "grpc" // default
+	p.rpcType = rpcType(os.Getenv(shared.PluginTypeEnvName))
+	if p.rpcType != rpcTypeRPC {
+		p.rpcType = rpcTypeGRPC // default
 	}
 
 	// logger
 	loggerOptions := &hclog.LoggerOptions{
-		Name:   p.rpcType,
+		Name:   fmt.Sprintf("%v-%v", p.rpcType, p.option.langType),
 		Output: os.Stdout,
 	}
 	if p.option.logOn {
@@ -49,7 +59,7 @@ func newHashicorpPlugin(path string, option *pluginOption) (*hashicorpPlugin, er
 
 	// cmd
 	var cmd *exec.Cmd
-	if filepath.Ext(path) == ".py" {
+	if p.option.langType == langTypePython {
 		// hashicorp python plugin
 		cmd = exec.Command(p.option.python3, path)
 	} else {
@@ -62,8 +72,8 @@ func newHashicorpPlugin(path string, option *pluginOption) (*hashicorpPlugin, er
 	p.client = plugin.NewClient(&plugin.ClientConfig{
 		HandshakeConfig: shared.HandshakeConfig,
 		Plugins: map[string]plugin.Plugin{
-			"rpc":  &fungo.RPCPlugin{},
-			"grpc": &fungo.GRPCPlugin{},
+			rpcTypeRPC.String():  &fungo.RPCPlugin{},
+			rpcTypeGRPC.String(): &fungo.GRPCPlugin{},
 		},
 		Cmd:    cmd,
 		Logger: hclog.New(loggerOptions),
@@ -80,7 +90,7 @@ func newHashicorpPlugin(path string, option *pluginOption) (*hashicorpPlugin, er
 	}
 
 	// Request the plugin
-	raw, err := rpcClient.Dispense(p.rpcType)
+	raw, err := rpcClient.Dispense(p.rpcType.String())
 	if err != nil {
 		return nil, errors.Wrap(err, fmt.Sprintf("request %s plugin failed", p.rpcType))
 	}
@@ -96,7 +106,7 @@ func newHashicorpPlugin(path string, option *pluginOption) (*hashicorpPlugin, er
 }
 
 func (p *hashicorpPlugin) Type() string {
-	return fmt.Sprintf("hashicorp-%s", p.rpcType)
+	return fmt.Sprintf("hashicorp-%s-%v", p.rpcType, p.option.langType)
 }
 
 func (p *hashicorpPlugin) Has(funcName string) bool {

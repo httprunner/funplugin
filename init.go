@@ -16,9 +16,18 @@ type IPlugin interface {
 	Quit() error                                                    // quit plugin
 }
 
+type langType string
+
+const (
+	langTypeGo     langType = "go"
+	langTypePython langType = "py"
+	langTypeJava   langType = "java"
+)
+
 type pluginOption struct {
-	logOn   bool
-	python3 string // python3 path with funppy dependency
+	logOn    bool
+	langType langType // go or py
+	python3  string   // python3 path with funppy dependency
 }
 
 type Option func(*pluginOption)
@@ -47,6 +56,7 @@ func Init(path string, options ...Option) (plugin IPlugin, err error) {
 	switch ext {
 	case ".bin":
 		// found hashicorp go plugin file
+		option.langType = langTypeGo
 		return newHashicorpPlugin(path, option)
 	case ".py":
 		// found hashicorp python plugin file
@@ -58,6 +68,7 @@ func Init(path string, options ...Option) (plugin IPlugin, err error) {
 			}
 			option.python3 = python3
 		}
+		option.langType = langTypePython
 		return newHashicorpPlugin(path, option)
 	case ".so":
 		// found go plugin file
