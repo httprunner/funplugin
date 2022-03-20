@@ -1,9 +1,10 @@
 [tool.poetry]
 name = "funppy"
-version = "0.3.0"
+version = "0.3.5"
 description = "Python plugin over gRPC for funplugin"
 license = "Apache-2.0"
 authors = ["debugtalk <mail@debugtalk.com>"]
+readme = "docs/python-grpc-plugin.md"
 repository = "https://github.com/httprunner/funplugin"
 
 [tool.poetry.dependencies]

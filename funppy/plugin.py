@@ -1,5 +1,6 @@
 import json
 import logging
+import random
 import sys
 import time
 from concurrent import futures
@@ -7,13 +8,9 @@ from typing import Callable
 
 import grpc
 
-from funppy import debugtalk_pb2
-from funppy import debugtalk_pb2_grpc
+from funppy import debugtalk_pb2, debugtalk_pb2_grpc
 
 __all__ = ["register", "serve"]
-
-# from grpc_health.v1.health import HealthServicer
-# from grpc_health.v1 import health_pb2, health_pb2_grpc
 
 functions = {}
 
@@ -50,19 +47,16 @@ class DebugTalkServicer(debugtalk_pb2_grpc.DebugTalkServicer):
 
 
 def serve():
-    # We need to build a health service to work with go-plugin
-    # health = HealthServicer()
-    # health.set("plugin", health_pb2.HealthCheckResponse.ServingStatus.Value('SERVING'))
-
     # Start the server.
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
     debugtalk_pb2_grpc.add_DebugTalkServicer_to_server(DebugTalkServicer(), server)
-    # health_pb2_grpc.add_HealthServicer_to_server(health, server)
-    server.add_insecure_port('127.0.0.1:1234')
+
+    random_port = random.randrange(20000, 60000)
+    server.add_insecure_port(f'127.0.0.1:{random_port}')
     server.start()
 
     # Output information
-    print("1|1|tcp|127.0.0.1:1234|grpc")
+    print(f"1|1|tcp|127.0.0.1:{random_port}|grpc")
     sys.stdout.flush()
 
     try:
