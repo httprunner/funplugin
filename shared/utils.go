@@ -166,15 +166,22 @@ func isExecutableFileExists(path string) bool {
 	info, err := os.Stat(path)
 	if err != nil {
 		// path not exists
+		log.Warn().Str("path", path).Msg("path is not exists")
 		return false
 	}
 
 	// path exists
 	if !info.Mode().IsRegular() {
 		// path is not regular file
+		log.Warn().Str("path", path).Msg("path is not regular file")
 		return false
 	}
 
 	// file path is executable
-	return info.Mode().Perm()&0100 != 0
+	if info.Mode().Perm()&0100 == 0 {
+		log.Warn().Str("path", path).Msg("path is not executable")
+		return false
+	}
+
+	return true
 }
