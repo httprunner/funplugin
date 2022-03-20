@@ -121,7 +121,13 @@ func PreparePython3Venv(path string) (python3 string, err error) {
 
 	defer func() {
 		if err == nil {
-			log.Info().Str("plugin", path).Msg("python3 venv is ready")
+			out, _ := exec.Command(
+				python3, "-c", "import funppy; print(funppy.__version__)",
+			).Output()
+			log.Info().
+				Str("plugin", path).
+				Str("funppyVersion", strings.TrimSpace(string(out))).
+				Msg("python3 venv is ready")
 		}
 	}()
 
