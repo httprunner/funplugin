@@ -162,7 +162,8 @@ func EnsurePython3Venv(venvDir string) (python3 string, err error) {
 
 	// install funppy
 	err = execCommand(python3, "-m",
-		"pip", "install", "funppy", "--quiet", "--disable-pip-version-check")
+		"pip", "install", fmt.Sprintf("funppy==%s", Version),
+		"--quiet", "--disable-pip-version-check")
 	if err != nil {
 		return "", errors.Wrap(err, "install funppy failed")
 	}

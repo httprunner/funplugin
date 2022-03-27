@@ -12,6 +12,8 @@ import (
 	"github.com/httprunner/funplugin/shared"
 )
 
+var Version = shared.Version
+
 // functionsMap stores plugin functions
 type functionsMap map[string]reflect.Value
 
