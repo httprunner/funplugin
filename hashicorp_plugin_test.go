@@ -3,6 +3,7 @@ package funplugin
 import (
 	"os"
 	"os/exec"
+	"path/filepath"
 	"testing"
 
 	"github.com/httprunner/funplugin/shared"
@@ -49,7 +50,9 @@ func TestHashicorpPythonPlugin(t *testing.T) {
 }
 
 func TestHashicorpPythonPluginWithVenv(t *testing.T) {
-	python3, err := shared.PreparePython3Venv(".")
+	home, _ := os.UserHomeDir()
+	venvDir := filepath.Join(home, ".hrp", "venv")
+	python3, err := shared.EnsurePython3Venv(venvDir)
 	if err != nil {
 		t.Fatal(err)
 	}

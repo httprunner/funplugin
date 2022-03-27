@@ -2,8 +2,10 @@ package funplugin
 
 import (
 	"fmt"
+	"os"
 	"path/filepath"
 
+	"github.com/pkg/errors"
 	"github.com/rs/zerolog/log"
 
 	"github.com/httprunner/funplugin/shared"
@@ -61,10 +63,15 @@ func Init(path string, options ...Option) (plugin IPlugin, err error) {
 	case ".py":
 		// found hashicorp python plugin file
 		if option.python3 == "" {
-			python3, err := shared.PreparePython3Venv(path)
+			// default python3 venv path in $HOME/.hrp/venv
+			home, err := os.UserHomeDir()
 			if err != nil {
-				log.Error().Err(err).Msg("prepare python venv failed")
-				return nil, err
+				return nil, errors.Wrap(err, "get user home dir failed")
+			}
+			venvDir := filepath.Join(home, ".hrp", "venv")
+			python3, err := shared.EnsurePython3Venv(venvDir)
+			if err != nil {
+				return nil, errors.Wrap(err, "ensure python venv failed")
 			}
 			option.python3 = python3
 		}

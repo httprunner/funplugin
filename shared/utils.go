@@ -108,11 +108,9 @@ func call(fn reflect.Value, args []reflect.Value) (interface{}, error) {
 	}
 }
 
-// PreparePython3Venv prepares python3 venv for hashicorp python plugin
-// created .venv directory will be located besides the plugin file path
-func PreparePython3Venv(path string) (python3 string, err error) {
-	projectDir, _ := filepath.Abs(filepath.Dir(path))
-	venvDir := filepath.Join(projectDir, ".venv")
+// EnsurePython3Venv ensures python3 venv for hashicorp python plugin
+// venvDir should be directory path of target venv
+func EnsurePython3Venv(venvDir string) (python3 string, err error) {
 	if runtime.GOOS == "windows" {
 		python3 = filepath.Join(venvDir, "Scripts", "python.exe")
 	} else {
@@ -125,7 +123,7 @@ func PreparePython3Venv(path string) (python3 string, err error) {
 				python3, "-c", "import funppy; print(funppy.__version__)",
 			).Output()
 			log.Info().
-				Str("plugin", path).
+				Str("venvDir", venvDir).
 				Str("funppyVersion", strings.TrimSpace(string(out))).
 				Msg("python3 venv is ready")
 		}
@@ -143,7 +141,7 @@ func PreparePython3Venv(path string) (python3 string, err error) {
 		if _, err := os.Stat(venvDir); err == nil {
 			// .venv exists, remove first
 			if err := execCommand("rm", "-rf", venvDir); err != nil {
-				return "", errors.Wrap(err, "remove existed .venv failed")
+				return "", errors.Wrap(err, "remove existed venv failed")
 			}
 		}
 
