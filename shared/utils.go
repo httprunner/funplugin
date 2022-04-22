@@ -110,24 +110,17 @@ func call(fn reflect.Value, args []reflect.Value) (interface{}, error) {
 
 // EnsurePython3Venv ensures python3 venv for hashicorp python plugin
 // venvDir should be directory path of target venv
-func EnsurePython3Venv(venvDir string) (python3 string, err error) {
+func EnsurePython3Venv(venvDir string, packages ...string) (python3 string, err error) {
 	if runtime.GOOS == "windows" {
 		python3 = filepath.Join(venvDir, "Scripts", "python.exe")
 	} else {
 		python3 = filepath.Join(venvDir, "bin", "python")
 	}
 
-	defer func() {
-		if err == nil {
-			out, _ := exec.Command(
-				python3, "-c", "import funppy; print(funppy.__version__)",
-			).Output()
-			log.Info().
-				Str("venvDir", venvDir).
-				Str("funppyVersion", strings.TrimSpace(string(out))).
-				Msg("python3 venv is ready")
-		}
-	}()
+	log.Info().
+		Str("python", python3).
+		Strs("packages", packages).
+		Msg("ensure python3 venv")
 
 	// check if python3 venv is available
 	if err := exec.Command(python3, "--version").Run(); err != nil {
@@ -153,21 +146,58 @@ func EnsurePython3Venv(venvDir string) (python3 string, err error) {
 		}
 	}
 
-	// check if funppy installed
-	err = exec.Command(python3, "-m", "pip", "show", "funppy", "--quiet").Run()
-	if err == nil {
-		// funppy is installed
-		return python3, nil
+	for _, pkg := range packages {
+		err := InstallPythonPackage(python3, pkg)
+		if err != nil {
+			return python3, errors.Wrap(err, fmt.Sprintf("pip install %s failed", pkg))
+		}
 	}
 
-	// install funppy
-	err = execCommand(python3, "-m",
-		"pip", "install", fmt.Sprintf("funppy==%s", Version),
-		"--quiet", "--disable-pip-version-check")
-	if err != nil {
-		return "", errors.Wrap(err, "install funppy failed")
-	}
 	return python3, nil
+}
+
+func InstallPythonPackage(python3 string, pkg string) (err error) {
+	var pkgName string
+	if strings.Contains(pkg, "==") {
+		// funppy==0.4.2
+		pkgInfo := strings.Split(pkg, "==")
+		pkgName = pkgInfo[0]
+	} else {
+		pkgName = pkg
+	}
+
+	defer func() {
+		if err == nil {
+			// check package version
+			if out, err := exec.Command(
+				python3, "-c", fmt.Sprintf("import %s; print(%s.__version__)", pkgName, pkgName),
+			).Output(); err == nil {
+				log.Info().
+					Str("name", pkgName).
+					Str("version", strings.TrimSpace(string(out))).
+					Msg("python package is ready")
+			}
+		}
+	}()
+
+	// check if funppy installed
+	err = exec.Command(python3, "-m", "pip", "show", pkgName, "--quiet").Run()
+	if err == nil {
+		// package is installed
+		return nil
+	}
+
+	log.Info().Str("package", pkg).Msg("installing python package")
+
+	// install package
+	err = exec.Command(python3, "-m",
+		"pip", "install", pkg,
+		"--quiet", "--disable-pip-version-check").Run()
+	if err != nil {
+		return errors.Wrap(err, "pip install package failed")
+	}
+
+	return nil
 }
 
 func execCommand(cmdName string, args ...string) error {
