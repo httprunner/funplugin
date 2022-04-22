@@ -181,7 +181,7 @@ func InstallPythonPackage(python3 string, pkg string) (err error) {
 	}()
 
 	// check if funppy installed
-	err = exec.Command(python3, "-m", "pip", "show", pkgName, "--quiet").Run()
+	err = execCommand(python3, "-m", "pip", "show", pkgName, "--quiet")
 	if err == nil {
 		// package is installed
 		return nil
@@ -190,9 +190,9 @@ func InstallPythonPackage(python3 string, pkg string) (err error) {
 	log.Info().Str("package", pkg).Msg("installing python package")
 
 	// install package
-	err = exec.Command(python3, "-m",
+	err = execCommand(python3, "-m",
 		"pip", "install", pkg,
-		"--quiet", "--disable-pip-version-check").Run()
+		"--quiet", "--disable-pip-version-check")
 	if err != nil {
 		return errors.Wrap(err, "pip install package failed")
 	}
@@ -203,12 +203,16 @@ func InstallPythonPackage(python3 string, pkg string) (err error) {
 func execCommand(cmdName string, args ...string) error {
 	cmd := exec.Command(cmdName, args...)
 	log.Info().Str("cmd", cmd.String()).Msg("exec command")
-	output, err := cmd.CombinedOutput()
-	out := strings.TrimSpace(string(output))
+
+	// print output with colors
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+
+	err := cmd.Run()
 	if err != nil {
-		log.Error().Err(err).Str("output", out).Msg("exec command failed")
-	} else if len(out) != 0 {
-		log.Info().Str("output", out).Msg("exec command success")
+		log.Error().Err(err).Msg("exec command failed")
+		return err
 	}
-	return err
+
+	return nil
 }
