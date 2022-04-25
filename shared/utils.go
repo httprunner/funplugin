@@ -112,13 +112,13 @@ func call(fn reflect.Value, args []reflect.Value) (interface{}, error) {
 // venvDir should be directory path of target venv
 func EnsurePython3Venv(venvDir string, packages ...string) (python3 string, err error) {
 	if runtime.GOOS == "windows" {
-		python3 = filepath.Join(venvDir, "Scripts", "python.exe")
+		python3 = filepath.Join(venvDir, "Scripts", "python3.exe")
 	} else {
-		python3 = filepath.Join(venvDir, "bin", "python")
+		python3 = filepath.Join(venvDir, "bin", "python3")
 	}
 
 	log.Info().
-		Str("python", python3).
+		Str("python3", python3).
 		Strs("packages", packages).
 		Msg("ensure python3 venv")
 
@@ -162,6 +162,10 @@ func InstallPythonPackage(python3 string, pkg string) (err error) {
 		// funppy==0.4.2
 		pkgInfo := strings.Split(pkg, "==")
 		pkgName = pkgInfo[0]
+	} else if strings.Contains(pkg, ">=") {
+		// httprunner>=4.0.0-beta
+		pkgInfo := strings.Split(pkg, ">=")
+		pkgName = pkgInfo[0]
 	} else {
 		pkgName = pkg
 	}
@@ -181,7 +185,7 @@ func InstallPythonPackage(python3 string, pkg string) (err error) {
 	}()
 
 	// check if funppy installed
-	err = execCommand(python3, "-m", "pip", "show", pkgName, "--quiet")
+	err = exec.Command(python3, "-m", "pip", "show", pkgName, "--quiet").Run()
 	if err == nil {
 		// package is installed
 		return nil
@@ -190,11 +194,10 @@ func InstallPythonPackage(python3 string, pkg string) (err error) {
 	log.Info().Str("package", pkg).Msg("installing python package")
 
 	// install package
-	err = execCommand(python3, "-m",
-		"pip", "install", pkg,
+	err = execCommand(python3, "-m", "pip", "install", "--upgrade", pkg,
 		"--quiet", "--disable-pip-version-check")
 	if err != nil {
-		return errors.Wrap(err, "pip install package failed")
+		return errors.Wrap(err, "pip3 install package failed")
 	}
 
 	return nil
