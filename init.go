@@ -69,7 +69,7 @@ func Init(path string, options ...Option) (plugin IPlugin, err error) {
 				return nil, errors.Wrap(err, "get user home dir failed")
 			}
 			venvDir := filepath.Join(home, ".hrp", "venv")
-			python3, err := shared.EnsurePython3Venv(venvDir, fmt.Sprintf("funppy==%s", shared.Version))
+			python3, err := shared.EnsurePython3Venv(venvDir, "funppy")
 			if err != nil {
 				return nil, errors.Wrap(err, "ensure python venv failed")
 			}
