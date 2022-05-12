@@ -123,7 +123,7 @@ func EnsurePython3Venv(venvDir string, packages ...string) (python3 string, err 
 		Msg("ensure python3 venv")
 
 	// check if python3 venv is available
-	if err := exec.Command(python3, "--version").Run(); err != nil {
+	if err := execCommand(python3, "--version"); err != nil {
 		// python3 venv not available, create one
 		// check if system python3 is available
 		if err := execCommand("python3", "--version"); err != nil {
@@ -133,8 +133,14 @@ func EnsurePython3Venv(venvDir string, packages ...string) (python3 string, err 
 		// check if .venv exists
 		if _, err := os.Stat(venvDir); err == nil {
 			// .venv exists, remove first
-			if err := execCommand("rm", "-rf", venvDir); err != nil {
-				return "", errors.Wrap(err, "remove existed venv failed")
+			if runtime.GOOS == "windows" {
+				if err := execCommand("del", "/q", venvDir); err != nil {
+					return "", errors.Wrap(err, "remove existed venv failed")
+				}
+			} else {
+				if err := execCommand("rm", "-rf", venvDir); err != nil {
+					return "", errors.Wrap(err, "remove existed venv failed")
+				}
 			}
 		}
 
@@ -142,7 +148,20 @@ func EnsurePython3Venv(venvDir string, packages ...string) (python3 string, err 
 		// notice: --symlinks should be specified for windows
 		// https://github.com/actions/virtual-environments/issues/2690
 		if err := execCommand("python3", "-m", "venv", "--symlinks", venvDir); err != nil {
-			return "", errors.Wrap(err, "create python3 venv failed")
+			// fix: failed to symlink on Windows
+			log.Warn().Msg("failed to create python3 .venv by using --symlinks, try to use --copies")
+			if err := execCommand("python3", "-m", "venv", "--copies", venvDir); err != nil {
+				return "", errors.Wrap(err, "create python3 venv failed")
+			}
+		}
+
+		// fix: python3 not existed on Windows
+		if _, err := os.Stat(python3); err != nil {
+			if runtime.GOOS == "windows" {
+				python3 = filepath.Join(venvDir, "Scripts", "python.exe")
+			} else {
+				python3 = filepath.Join(venvDir, "bin", "python")
+			}
 		}
 	}
 
@@ -204,7 +223,15 @@ func InstallPythonPackage(python3 string, pkg string) (err error) {
 }
 
 func execCommand(cmdName string, args ...string) error {
-	cmd := exec.Command(cmdName, args...)
+	var cmd *exec.Cmd
+	if runtime.GOOS == "windows" {
+		// "cmd /c" carries out the command specified by string and then stops
+		// refer: https://docs.microsoft.com/en-us/windows-server/administration/windows-commands/cmd
+		cmdStr := fmt.Sprintf("%s %s", cmdName, strings.Join(args, " "))
+		cmd = exec.Command("cmd", "/c", cmdStr)
+	} else {
+		cmd = exec.Command(cmdName, args...)
+	}
 	log.Info().Str("cmd", cmd.String()).Msg("exec command")
 
 	// print output with colors
