@@ -134,7 +134,7 @@ func InstallPythonPackage(python3 string, pkg string) (err error) {
 	}()
 
 	// check if funppy installed
-	err = exec.Command(python3, "-m", "pip", "show", pkgName, "--quiet").Run()
+	err = execCommand(python3, "-m", "pip", "show", pkgName, "--quiet")
 	if err == nil {
 		// package is installed
 		return nil

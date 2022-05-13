@@ -23,7 +23,7 @@ func EnsurePython3Venv(venvDir string, packages ...string) (python3 string, err 
 		Msg("ensure python3 venv")
 
 	// check if python3 venv is available
-	if err := execCommand(python3, "--version"); err != nil {
+	if err := exec.Command("cmd", "/c", python3, "--version").Run(); err != nil {
 		// python3 venv not available, create one
 		// check if system python3 is available
 		if err := execCommand("python3", "--version"); err != nil {
@@ -49,9 +49,13 @@ func EnsurePython3Venv(venvDir string, packages ...string) (python3 string, err 
 			}
 		}
 
-		// fix: python3 not existed on Windows
+		// fix: python3 doesn't exist in .venv on Windows
 		if _, err := os.Stat(python3); err != nil {
-			python3 = filepath.Join(venvDir, "Scripts", "python.exe")
+			log.Warn().Msg("python3 doesn't exist, try to link python")
+			err := os.Link(filepath.Join(venvDir, "Scripts", "python.exe"), python3)
+			if err != nil {
+				return "", errors.Wrap(err, "python3 doesn't exist in .venv")
+			}
 		}
 	}
 
