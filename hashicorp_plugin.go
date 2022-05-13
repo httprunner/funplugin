@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"sync"
 
 	"github.com/hashicorp/go-hclog"
 	"github.com/hashicorp/go-plugin"
@@ -30,7 +31,7 @@ type hashicorpPlugin struct {
 	client          *plugin.Client
 	rpcType         rpcType
 	funcCaller      shared.IFuncCaller
-	cachedFunctions map[string]bool // cache loaded functions to improve performance
+	cachedFunctions sync.Map // cache loaded functions to improve performance, key is function name, value is bool
 	option          *pluginOption
 }
 
@@ -99,7 +100,7 @@ func newHashicorpPlugin(path string, option *pluginOption) (*hashicorpPlugin, er
 	// implementation but is in fact over an RPC connection.
 	p.funcCaller = raw.(shared.IFuncCaller)
 
-	p.cachedFunctions = make(map[string]bool)
+	p.cachedFunctions = sync.Map{}
 	log.Info().Str("path", path).Msg("load hashicorp go plugin success")
 
 	return p, nil
@@ -110,9 +111,9 @@ func (p *hashicorpPlugin) Type() string {
 }
 
 func (p *hashicorpPlugin) Has(funcName string) bool {
-	flag, ok := p.cachedFunctions[funcName]
+	flag, ok := p.cachedFunctions.Load(funcName)
 	if ok {
-		return flag
+		return flag.(bool)
 	}
 
 	funcNames, err := p.funcCaller.GetNames()
@@ -122,12 +123,12 @@ func (p *hashicorpPlugin) Has(funcName string) bool {
 
 	for _, name := range funcNames {
 		if name == funcName {
-			p.cachedFunctions[funcName] = true // cache as exists
+			p.cachedFunctions.Store(funcName, true) // cache as exists
 			return true
 		}
 	}
 
-	p.cachedFunctions[funcName] = false // cache as not exists
+	p.cachedFunctions.Store(funcName, false) // cache as not exists
 	return false
 }
 

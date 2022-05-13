@@ -2,11 +2,8 @@ package shared
 
 import (
 	"fmt"
-	"os"
 	"os/exec"
-	"path/filepath"
 	"reflect"
-	"runtime"
 	"strings"
 
 	"github.com/pkg/errors"
@@ -108,73 +105,6 @@ func call(fn reflect.Value, args []reflect.Value) (interface{}, error) {
 	}
 }
 
-// EnsurePython3Venv ensures python3 venv for hashicorp python plugin
-// venvDir should be directory path of target venv
-func EnsurePython3Venv(venvDir string, packages ...string) (python3 string, err error) {
-	if runtime.GOOS == "windows" {
-		python3 = filepath.Join(venvDir, "Scripts", "python3.exe")
-	} else {
-		python3 = filepath.Join(venvDir, "bin", "python3")
-	}
-
-	log.Info().
-		Str("python3", python3).
-		Strs("packages", packages).
-		Msg("ensure python3 venv")
-
-	// check if python3 venv is available
-	if err := execCommand(python3, "--version"); err != nil {
-		// python3 venv not available, create one
-		// check if system python3 is available
-		if err := execCommand("python3", "--version"); err != nil {
-			return "", errors.Wrap(err, "python3 not found")
-		}
-
-		// check if .venv exists
-		if _, err := os.Stat(venvDir); err == nil {
-			// .venv exists, remove first
-			if runtime.GOOS == "windows" {
-				if err := execCommand("del", "/q", venvDir); err != nil {
-					return "", errors.Wrap(err, "remove existed venv failed")
-				}
-			} else {
-				if err := execCommand("rm", "-rf", venvDir); err != nil {
-					return "", errors.Wrap(err, "remove existed venv failed")
-				}
-			}
-		}
-
-		// create python3 .venv
-		// notice: --symlinks should be specified for windows
-		// https://github.com/actions/virtual-environments/issues/2690
-		if err := execCommand("python3", "-m", "venv", "--symlinks", venvDir); err != nil {
-			// fix: failed to symlink on Windows
-			log.Warn().Msg("failed to create python3 .venv by using --symlinks, try to use --copies")
-			if err := execCommand("python3", "-m", "venv", "--copies", venvDir); err != nil {
-				return "", errors.Wrap(err, "create python3 venv failed")
-			}
-		}
-
-		// fix: python3 not existed on Windows
-		if _, err := os.Stat(python3); err != nil {
-			if runtime.GOOS == "windows" {
-				python3 = filepath.Join(venvDir, "Scripts", "python.exe")
-			} else {
-				python3 = filepath.Join(venvDir, "bin", "python")
-			}
-		}
-	}
-
-	for _, pkg := range packages {
-		err := InstallPythonPackage(python3, pkg)
-		if err != nil {
-			return python3, errors.Wrap(err, fmt.Sprintf("pip install %s failed", pkg))
-		}
-	}
-
-	return python3, nil
-}
-
 func InstallPythonPackage(python3 string, pkg string) (err error) {
 	var pkgName string
 	if strings.Contains(pkg, "==") {
@@ -204,7 +134,7 @@ func InstallPythonPackage(python3 string, pkg string) (err error) {
 	}()
 
 	// check if funppy installed
-	err = exec.Command(python3, "-m", "pip", "show", pkgName, "--quiet").Run()
+	err = execCommand(python3, "-m", "pip", "show", pkgName, "--quiet")
 	if err == nil {
 		// package is installed
 		return nil
@@ -217,31 +147,6 @@ func InstallPythonPackage(python3 string, pkg string) (err error) {
 		"--quiet", "--disable-pip-version-check")
 	if err != nil {
 		return errors.Wrap(err, "pip3 install package failed")
-	}
-
-	return nil
-}
-
-func execCommand(cmdName string, args ...string) error {
-	var cmd *exec.Cmd
-	if runtime.GOOS == "windows" {
-		// "cmd /c" carries out the command specified by string and then stops
-		// refer: https://docs.microsoft.com/en-us/windows-server/administration/windows-commands/cmd
-		cmdStr := fmt.Sprintf("%s %s", cmdName, strings.Join(args, " "))
-		cmd = exec.Command("cmd", "/c", cmdStr)
-	} else {
-		cmd = exec.Command(cmdName, args...)
-	}
-	log.Info().Str("cmd", cmd.String()).Msg("exec command")
-
-	// print output with colors
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-
-	err := cmd.Run()
-	if err != nil {
-		log.Error().Err(err).Msg("exec command failed")
-		return err
 	}
 
 	return nil

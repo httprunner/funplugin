@@ -4,7 +4,7 @@ import (
 	"github.com/hashicorp/go-plugin"
 )
 
-const Version = "v0.4.4"
+const Version = "v0.4.5"
 
 // PluginTypeEnvName is used to specify hashicorp go plugin type, rpc/grpc
 const PluginTypeEnvName = "HRP_PLUGIN_TYPE"
