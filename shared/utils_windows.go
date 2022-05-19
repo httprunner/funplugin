@@ -22,12 +22,17 @@ func EnsurePython3Venv(venvDir string, packages ...string) (python3 string, err 
 		Strs("packages", packages).
 		Msg("ensure python3 venv")
 
+	systemPython := "python3"
+
 	// check if python3 venv is available
 	if err := exec.Command("cmd", "/c", python3, "--version").Run(); err != nil {
 		// python3 venv not available, create one
 		// check if system python3 is available
-		if err := execCommand("python3", "--version"); err != nil {
-			return "", errors.Wrap(err, "python3 not found")
+		if err := execCommand(systemPython, "--version"); err != nil {
+			if err := execCommand("python", "--version"); err != nil {
+				return "", errors.Wrap(err, "python3 not found")
+			}
+			systemPython = "python"
 		}
 
 		// check if .venv exists
@@ -41,10 +46,10 @@ func EnsurePython3Venv(venvDir string, packages ...string) (python3 string, err 
 		// create python3 .venv
 		// notice: --symlinks should be specified for windows
 		// https://github.com/actions/virtual-environments/issues/2690
-		if err := execCommand("python3", "-m", "venv", "--symlinks", venvDir); err != nil {
+		if err := execCommand(systemPython, "-m", "venv", "--symlinks", venvDir); err != nil {
 			// fix: failed to symlink on Windows
 			log.Warn().Msg("failed to create python3 .venv by using --symlinks, try to use --copies")
-			if err := execCommand("python3", "-m", "venv", "--copies", venvDir); err != nil {
+			if err := execCommand(systemPython, "-m", "venv", "--copies", venvDir); err != nil {
 				return "", errors.Wrap(err, "create python3 venv failed")
 			}
 		}
