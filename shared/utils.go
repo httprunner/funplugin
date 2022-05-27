@@ -151,3 +151,8 @@ func InstallPythonPackage(python3 string, pkg string) (err error) {
 
 	return nil
 }
+
+// ConvertCommonName returns name which deleted "_" and converted capital letter to their lower case
+func ConvertCommonName(name string) string {
+	return strings.ToLower(strings.Replace(name, "_", "", -1))
+}
