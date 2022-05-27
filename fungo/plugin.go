@@ -51,6 +51,8 @@ func Register(funcName string, fn interface{}) {
 		return
 	}
 	functions[funcName] = reflect.ValueOf(fn)
+	// automatic registration with common name
+	functions[shared.ConvertCommonName(funcName)] = reflect.ValueOf(fn)
 }
 
 // serveRPC starts a plugin server process in RPC mode.

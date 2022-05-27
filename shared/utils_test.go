@@ -206,3 +206,33 @@ func TestCallFuncAbnormal(t *testing.T) {
 	}
 
 }
+
+func TestConvertCommonName(t *testing.T) {
+	testData := []struct {
+		expectedValue string
+		originalValue string
+	}{
+		{
+			expectedValue: "httprunner",
+			originalValue: "HttpRunner",
+		},
+		{
+			expectedValue: "httprunner",
+			originalValue: "http_runner",
+		},
+		{
+			expectedValue: "httprunner",
+			originalValue: "_http_runner",
+		},
+		{
+			expectedValue: "httprunner",
+			originalValue: "HTTP_Runner",
+		},
+	}
+	for _, data := range testData {
+		name := ConvertCommonName(data.originalValue)
+		if !assert.Equal(t, data.expectedValue, name) {
+			t.Fatal()
+		}
+	}
+}
