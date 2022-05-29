@@ -13,6 +13,7 @@ import (
 
 type IPlugin interface {
 	Type() string                                                   // get plugin type
+	Path() string                                                   // get plugin file path
 	Has(funcName string) bool                                       // check if plugin has function
 	Call(funcName string, args ...interface{}) (interface{}, error) // call function
 	Quit() error                                                    // quit plugin

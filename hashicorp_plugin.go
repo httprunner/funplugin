@@ -32,11 +32,13 @@ type hashicorpPlugin struct {
 	rpcType         rpcType
 	funcCaller      shared.IFuncCaller
 	cachedFunctions sync.Map // cache loaded functions to improve performance, key is function name, value is bool
+	path            string   // plugin file path
 	option          *pluginOption
 }
 
 func newHashicorpPlugin(path string, option *pluginOption) (*hashicorpPlugin, error) {
 	p := &hashicorpPlugin{
+		path:   path,
 		option: option,
 	}
 
@@ -108,6 +110,10 @@ func newHashicorpPlugin(path string, option *pluginOption) (*hashicorpPlugin, er
 
 func (p *hashicorpPlugin) Type() string {
 	return fmt.Sprintf("hashicorp-%s-%v", p.rpcType, p.option.langType)
+}
+
+func (p *hashicorpPlugin) Path() string {
+	return p.path
 }
 
 func (p *hashicorpPlugin) Has(funcName string) bool {

@@ -14,6 +14,7 @@ import (
 // goPlugin implements golang official plugin
 type goPlugin struct {
 	*plugin.Plugin
+	path            string                   // plugin file path
 	cachedFunctions map[string]reflect.Value // cache loaded functions to improve performance
 }
 
@@ -32,6 +33,7 @@ func newGoPlugin(path string) (*goPlugin, error) {
 	log.Info().Str("path", path).Msg("load go plugin success")
 	p := &goPlugin{
 		Plugin:          plg,
+		path:            path,
 		cachedFunctions: make(map[string]reflect.Value),
 	}
 	return p, nil
@@ -39,6 +41,10 @@ func newGoPlugin(path string) (*goPlugin, error) {
 
 func (p *goPlugin) Type() string {
 	return "go-plugin"
+}
+
+func (p *goPlugin) Path() string {
+	return p.path
 }
 
 func (p *goPlugin) Has(funcName string) bool {
