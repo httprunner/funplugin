@@ -133,6 +133,13 @@ func InstallPythonPackage(python3 string, pkg string) (err error) {
 		}
 	}()
 
+	// check if pip available
+	err = execCommand(python3, "-m", "pip", "--version")
+	if err != nil {
+		log.Warn().Msg("pip is not available")
+		return errors.Wrap(err, "pip is not available")
+	}
+
 	// check if funppy installed
 	err = execCommand(python3, "-m", "pip", "show", pkgName, "--quiet")
 	if err == nil {
@@ -146,7 +153,7 @@ func InstallPythonPackage(python3 string, pkg string) (err error) {
 	err = execCommand(python3, "-m", "pip", "install", "--upgrade", pkg,
 		"--quiet", "--disable-pip-version-check")
 	if err != nil {
-		return errors.Wrap(err, "pip3 install package failed")
+		return errors.Wrap(err, "pip install package failed")
 	}
 
 	return nil
