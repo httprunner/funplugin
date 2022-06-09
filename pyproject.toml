@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "funppy"
-version = "0.4.8"
+version = "0.4.9"
 description = "Python plugin over gRPC for funplugin"
 license = "Apache-2.0"
 authors = ["debugtalk <mail@debugtalk.com>"]
