@@ -1,14 +1,11 @@
 package funplugin
 
 import (
+	"errors"
 	"fmt"
-	"os"
 	"path/filepath"
 
-	"github.com/pkg/errors"
 	"github.com/rs/zerolog/log"
-
-	"github.com/httprunner/funplugin/shared"
 )
 
 type IPlugin interface {
@@ -64,17 +61,7 @@ func Init(path string, options ...Option) (plugin IPlugin, err error) {
 	case ".py":
 		// found hashicorp python plugin file
 		if option.python3 == "" {
-			// default python3 venv path in $HOME/.hrp/venv
-			home, err := os.UserHomeDir()
-			if err != nil {
-				return nil, errors.Wrap(err, "get user home dir failed")
-			}
-			venvDir := filepath.Join(home, ".hrp", "venv")
-			python3, err := shared.EnsurePython3Venv(venvDir, "funppy")
-			if err != nil {
-				return nil, errors.Wrap(err, "ensure python venv failed")
-			}
-			option.python3 = python3
+			return nil, errors.New("python3 not specified")
 		}
 		option.langType = langTypePython
 		return newHashicorpPlugin(path, option)

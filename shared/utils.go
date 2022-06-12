@@ -2,11 +2,9 @@ package shared
 
 import (
 	"fmt"
-	"os/exec"
 	"reflect"
 	"strings"
 
-	"github.com/pkg/errors"
 	"github.com/rs/zerolog/log"
 )
 
@@ -103,59 +101,6 @@ func call(fn reflect.Value, args []reflect.Value) (interface{}, error) {
 		err := fmt.Errorf("function should return at most 2 values")
 		return nil, err
 	}
-}
-
-func InstallPythonPackage(python3 string, pkg string) (err error) {
-	var pkgName string
-	if strings.Contains(pkg, "==") {
-		// funppy==0.4.2
-		pkgInfo := strings.Split(pkg, "==")
-		pkgName = pkgInfo[0]
-	} else if strings.Contains(pkg, ">=") {
-		// httprunner>=4.0.0-beta
-		pkgInfo := strings.Split(pkg, ">=")
-		pkgName = pkgInfo[0]
-	} else {
-		pkgName = pkg
-	}
-
-	defer func() {
-		if err == nil {
-			// check package version
-			if out, err := exec.Command(
-				python3, "-c", fmt.Sprintf("import %s; print(%s.__version__)", pkgName, pkgName),
-			).Output(); err == nil {
-				log.Info().
-					Str("name", pkgName).
-					Str("version", strings.TrimSpace(string(out))).
-					Msg("python package is ready")
-			}
-		}
-	}()
-
-	// check if package installed
-	err = exec.Command(python3, "-c", fmt.Sprintf("import %s", pkgName)).Run()
-	if err == nil {
-		return nil
-	}
-
-	// check if pip available
-	err = execCommand(python3, "-m", "pip", "--version")
-	if err != nil {
-		log.Warn().Msg("pip is not available")
-		return errors.Wrap(err, "pip is not available")
-	}
-
-	log.Info().Str("package", pkg).Msg("installing python package")
-
-	// install package
-	err = execCommand(python3, "-m", "pip", "install", "--upgrade", pkg,
-		"--quiet", "--disable-pip-version-check")
-	if err != nil {
-		return errors.Wrap(err, "pip install package failed")
-	}
-
-	return nil
 }
 
 // ConvertCommonName returns name which deleted "_" and converted capital letter to their lower case

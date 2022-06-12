@@ -1,4 +1,6 @@
+//go:build linux || freebsd || darwin
 // +build linux freebsd darwin
+
 // go plugin doesn't support windows
 
 package funplugin

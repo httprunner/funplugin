@@ -1,8 +1,6 @@
 import logging
 from typing import List
 
-import funppy
-
 
 def sum(*args):
     result = 0
@@ -44,6 +42,7 @@ def teardown_hook_example(name):
 
 
 if __name__ == '__main__':
+    import funppy
     funppy.register("sum", sum)
     funppy.register("sum_ints", sum_ints)
     funppy.register("concatenate", concatenate)

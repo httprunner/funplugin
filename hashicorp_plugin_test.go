@@ -1,12 +1,13 @@
 package funplugin
 
 import (
+	"io/ioutil"
 	"os"
 	"os/exec"
 	"path/filepath"
+	"runtime"
 	"testing"
 
-	"github.com/httprunner/funplugin/shared"
 	"github.com/rs/zerolog/log"
 	"github.com/stretchr/testify/assert"
 )
@@ -39,23 +40,36 @@ func TestHashicorpGoPlugin(t *testing.T) {
 	assertPlugin(t, plugin)
 }
 
-func TestHashicorpPythonPlugin(t *testing.T) {
-	plugin, err := Init("funppy/examples/debugtalk.py")
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer plugin.Quit()
-
-	assertPlugin(t, plugin)
+func TestHashicorpPythonPluginWithoutVenv(t *testing.T) {
+	_, err := Init("funppy/examples/debugtalk.py")
+	assert.EqualError(t, err, "python3 not specified")
 }
 
 func TestHashicorpPythonPluginWithVenv(t *testing.T) {
-	home, _ := os.UserHomeDir()
-	venvDir := filepath.Join(home, ".hrp", "venv")
-	python3, err := shared.EnsurePython3Venv(venvDir)
+	dir, err := ioutil.TempDir(os.TempDir(), "prefix")
 	if err != nil {
 		t.Fatal(err)
 	}
+	defer os.RemoveAll(dir)
+
+	venvDir := filepath.Join(dir, ".hrp", "venv")
+	err = exec.Command("python3", "-m", "venv", venvDir).Run()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	var python3 string
+	if runtime.GOOS == "windows" {
+		python3 = filepath.Join(venvDir, "Scripts", "python3.exe")
+	} else {
+		python3 = filepath.Join(venvDir, "bin", "python3")
+	}
+
+	err = exec.Command(python3, "-m", "pip", "install", "funppy").Run()
+	if err != nil {
+		t.Fatal(err)
+	}
+
 	plugin, err := Init("funppy/examples/debugtalk.py", WithPython3(python3))
 	if err != nil {
 		t.Fatal(err)
