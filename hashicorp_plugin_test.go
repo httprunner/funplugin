@@ -31,7 +31,8 @@ func TestHashicorpGoPlugin(t *testing.T) {
 	buildHashicorpGoPlugin()
 	defer removeHashicorpGoPlugin()
 
-	plugin, err := Init("fungo/examples/debugtalk.bin")
+	plugin, err := Init("fungo/examples/debugtalk.bin",
+		WithLogOn(true))
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -54,9 +54,10 @@ func newHashicorpPlugin(path string, option *pluginOption) (*hashicorpPlugin, er
 		Output: os.Stdout,
 	}
 	if p.option.logOn {
-		// turn on plugin log
+		log.Info().Msg("enable plugin log")
 		loggerOptions.Level = hclog.Debug
 	} else {
+		log.Info().Msg("disable plugin log")
 		loggerOptions.Level = hclog.Info
 	}
 
