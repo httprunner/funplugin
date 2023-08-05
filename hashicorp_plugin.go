@@ -69,6 +69,7 @@ func newHashicorpPlugin(path string, option *pluginOption) (*hashicorpPlugin, er
 	cmd.Env = append(os.Environ(), fmt.Sprintf("%s=%s", shared.PluginTypeEnvName, p.rpcType))
 
 	// launch the plugin process
+	logger.Info("launch the plugin process")
 	p.client = plugin.NewClient(&plugin.ClientConfig{
 		HandshakeConfig: shared.HandshakeConfig,
 		Plugins: map[string]plugin.Plugin{
@@ -114,6 +115,7 @@ func (p *hashicorpPlugin) Path() string {
 }
 
 func (p *hashicorpPlugin) Has(funcName string) bool {
+	logger.Debug("check if plugin has function", "funcName", funcName)
 	flag, ok := p.cachedFunctions.Load(funcName)
 	if ok {
 		return flag.(bool)

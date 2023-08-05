@@ -21,7 +21,7 @@ type functionGRPCClient struct {
 }
 
 func (m *functionGRPCClient) GetNames() ([]string, error) {
-	logger.Info("function GetNames called on host side")
+	logger.Debug("gRPC_client GetNames()")
 	resp, err := m.client.GetNames(context.Background(), &protoGen.Empty{})
 	if err != nil {
 		logger.Error("gRPC call GetNames() failed", "error", err)
@@ -31,7 +31,7 @@ func (m *functionGRPCClient) GetNames() ([]string, error) {
 }
 
 func (m *functionGRPCClient) Call(funcName string, funcArgs ...interface{}) (interface{}, error) {
-	logger.Info("call function via gRPC", "funcName", funcName, "funcArgs", funcArgs)
+	logger.Info("gRPC_client Call()", "funcName", funcName, "funcArgs", funcArgs)
 
 	funcArgBytes, err := json.Marshal(funcArgs)
 	if err != nil {
@@ -44,7 +44,7 @@ func (m *functionGRPCClient) Call(funcName string, funcArgs ...interface{}) (int
 
 	response, err := m.client.Call(context.Background(), req)
 	if err != nil {
-		logger.Error("gRPC Call() failed",
+		logger.Error("gRPC_client Call() failed",
 			"funcName", funcName,
 			"funcArgs", funcArgs,
 			"error", err,
@@ -57,6 +57,7 @@ func (m *functionGRPCClient) Call(funcName string, funcArgs ...interface{}) (int
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to unmarshal Call() response")
 	}
+	logger.Info("gRPC_client Call() success", "result", resp)
 	return resp, nil
 }
 
@@ -67,26 +68,26 @@ type functionGRPCServer struct {
 }
 
 func (m *functionGRPCServer) GetNames(ctx context.Context, req *protoGen.Empty) (*protoGen.GetNamesResponse, error) {
-	logger.Info("gRPC GetNames() called on plugin side", "req", req)
+	logger.Debug("gRPC_server GetNames()")
 	v, err := m.Impl.GetNames()
 	if err != nil {
-		logger.Error("gRPC GetNames() execution failed", "error", err)
+		logger.Error("gRPC_server GetNames() failed", "error", err)
 		return nil, err
 	}
 	return &protoGen.GetNamesResponse{Names: v}, err
 }
 
 func (m *functionGRPCServer) Call(ctx context.Context, req *protoGen.CallRequest) (*protoGen.CallResponse, error) {
+	logger.Debug("gRPC_server Call()")
+
 	var funcArgs []interface{}
 	if err := json.Unmarshal(req.Args, &funcArgs); err != nil {
 		return nil, errors.Wrap(err, "failed to unmarshal Call() funcArgs")
 	}
 
-	logger.Info("gRPC Call() called on plugin side", "req", req)
-
 	v, err := m.Impl.Call(req.Name, funcArgs...)
 	if err != nil {
-		logger.Error("gRPC Call() execution failed", "req", req, "error", err)
+		logger.Error("gRPC_server Call() failed", "req", req, "error", err)
 		return nil, err
 	}
 

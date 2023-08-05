@@ -11,10 +11,12 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+var pluginBinPath = "fungo/examples/debugtalk.bin"
+
 func buildHashicorpGoPlugin() {
-	logger.Info("[init] build hashicorp go plugin")
+	logger.Info("[setup test] build hashicorp go plugin", "path", pluginBinPath)
 	cmd := exec.Command("go", "build",
-		"-o", "fungo/examples/debugtalk.bin",
+		"-o", pluginBinPath,
 		"fungo/examples/hashicorp.go", "fungo/examples/debugtalk.go")
 	if err := cmd.Run(); err != nil {
 		panic(err)
@@ -22,8 +24,8 @@ func buildHashicorpGoPlugin() {
 }
 
 func removeHashicorpGoPlugin() {
-	logger.Info("[teardown] remove hashicorp plugin")
-	os.Remove("fungo/examples/debugtalk.bin")
+	logger.Info("[teardown test] remove hashicorp plugin", "path", pluginBinPath)
+	os.Remove(pluginBinPath)
 }
 
 func TestHashicorpGoPlugin(t *testing.T) {

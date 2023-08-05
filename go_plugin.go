@@ -46,6 +46,7 @@ func (p *goPlugin) Path() string {
 }
 
 func (p *goPlugin) Has(funcName string) bool {
+	logger.Debug("check if plugin has function", "funcName", funcName)
 	fn, ok := p.cachedFunctions[funcName]
 	if ok {
 		return fn.IsValid()

@@ -30,12 +30,13 @@ func (p *functionPlugin) GetNames() ([]string, error) {
 	for name := range p.functions {
 		names = append(names, name)
 	}
-	p.logger.Debug("get function names", "names", names)
+	p.logger.Debug("get plugin function names", "names", names)
 	return names, nil
 }
 
 func (p *functionPlugin) Call(funcName string, args ...interface{}) (interface{}, error) {
-	p.logger.Info("call function", "funcName", funcName, "args", args)
+	// notice: this is the actual place where plugin function is called
+	p.logger.Debug("plugin function execution", "funcName", funcName, "args", args)
 
 	fn, ok := p.functions[funcName]
 	if !ok {

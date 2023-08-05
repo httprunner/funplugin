@@ -25,10 +25,11 @@ type functionRPCClient struct {
 }
 
 func (g *functionRPCClient) GetNames() ([]string, error) {
+	logger.Debug("rpc_client GetNames()")
 	var resp []string
 	err := g.client.Call("Plugin.GetNames", new(interface{}), &resp)
 	if err != nil {
-		logger.Error("rpc call GetNames() failed", "error", err)
+		logger.Error("rpc_client GetNames() failed", "error", err)
 		return nil, err
 	}
 	return resp, nil
@@ -36,7 +37,7 @@ func (g *functionRPCClient) GetNames() ([]string, error) {
 
 // host -> plugin
 func (g *functionRPCClient) Call(funcName string, funcArgs ...interface{}) (interface{}, error) {
-	logger.Info("call function via RPC", "funcName", funcName, "funcArgs", funcArgs)
+	logger.Info("rpc_client Call()", "funcName", funcName, "funcArgs", funcArgs)
 	f := funcData{
 		Name: funcName,
 		Args: funcArgs,
@@ -46,13 +47,14 @@ func (g *functionRPCClient) Call(funcName string, funcArgs ...interface{}) (inte
 	var resp interface{}
 	err := g.client.Call("Plugin.Call", &args, &resp)
 	if err != nil {
-		logger.Error("rpc Call() failed",
+		logger.Error("rpc_client Call() failed",
 			"funcName", funcName,
 			"funcArgs", funcArgs,
 			"error", err,
 		)
 		return nil, err
 	}
+	logger.Info("rpc_client Call() success", "result", resp)
 	return resp, nil
 }
 
@@ -63,11 +65,11 @@ type functionRPCServer struct {
 
 // plugin execution
 func (s *functionRPCServer) GetNames(args interface{}, resp *[]string) error {
-	logger.Info("rpc GetNames() called on plugin side", "args", args)
+	logger.Debug("rpc_server GetNames()")
 	var err error
 	*resp, err = s.Impl.GetNames()
 	if err != nil {
-		logger.Error("rpc GetNames() execution failed", "error", err)
+		logger.Error("rpc_server GetNames() failed", "error", err)
 		return err
 	}
 	return nil
@@ -75,12 +77,12 @@ func (s *functionRPCServer) GetNames(args interface{}, resp *[]string) error {
 
 // plugin execution
 func (s *functionRPCServer) Call(args interface{}, resp *interface{}) error {
-	logger.Info("rpc Call() called on plugin side", "args", args)
+	logger.Debug("rpc_server Call()")
 	f := args.(*funcData)
 	var err error
 	*resp, err = s.Impl.Call(f.Name, f.Args...)
 	if err != nil {
-		logger.Error("rpc Call() execution failed", "args", args, "error", err)
+		logger.Error("rpc_server Call() failed", "args", args, "error", err)
 		return err
 	}
 	return nil
