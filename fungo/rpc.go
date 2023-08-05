@@ -5,7 +5,6 @@ import (
 	"net/rpc"
 
 	"github.com/hashicorp/go-plugin"
-	"github.com/rs/zerolog/log"
 
 	"github.com/httprunner/funplugin/shared"
 )
@@ -29,7 +28,7 @@ func (g *functionRPCClient) GetNames() ([]string, error) {
 	var resp []string
 	err := g.client.Call("Plugin.GetNames", new(interface{}), &resp)
 	if err != nil {
-		log.Error().Err(err).Msg("rpc call GetNames() failed")
+		logger.Error("rpc call GetNames() failed", "error", err)
 		return nil, err
 	}
 	return resp, nil
@@ -37,7 +36,7 @@ func (g *functionRPCClient) GetNames() ([]string, error) {
 
 // host -> plugin
 func (g *functionRPCClient) Call(funcName string, funcArgs ...interface{}) (interface{}, error) {
-	log.Info().Str("funcName", funcName).Interface("funcArgs", funcArgs).Msg("call function via RPC")
+	logger.Info("call function via RPC", "funcName", funcName, "funcArgs", funcArgs)
 	f := funcData{
 		Name: funcName,
 		Args: funcArgs,
@@ -47,9 +46,11 @@ func (g *functionRPCClient) Call(funcName string, funcArgs ...interface{}) (inte
 	var resp interface{}
 	err := g.client.Call("Plugin.Call", &args, &resp)
 	if err != nil {
-		log.Error().Err(err).
-			Str("funcName", funcName).Interface("funcArgs", funcArgs).
-			Msg("rpc Call() failed")
+		logger.Error("rpc Call() failed",
+			"funcName", funcName,
+			"funcArgs", funcArgs,
+			"error", err,
+		)
 		return nil, err
 	}
 	return resp, nil
@@ -62,11 +63,11 @@ type functionRPCServer struct {
 
 // plugin execution
 func (s *functionRPCServer) GetNames(args interface{}, resp *[]string) error {
-	log.Info().Interface("args", args).Msg("rpc GetNames() called on plugin side")
+	logger.Info("rpc GetNames() called on plugin side", "args", args)
 	var err error
 	*resp, err = s.Impl.GetNames()
 	if err != nil {
-		log.Error().Err(err).Msg("rpc GetNames() execution failed")
+		logger.Error("rpc GetNames() execution failed", "error", err)
 		return err
 	}
 	return nil
@@ -74,12 +75,12 @@ func (s *functionRPCServer) GetNames(args interface{}, resp *[]string) error {
 
 // plugin execution
 func (s *functionRPCServer) Call(args interface{}, resp *interface{}) error {
-	log.Info().Interface("args", args).Msg("rpc Call() called on plugin side")
+	logger.Info("rpc Call() called on plugin side", "args", args)
 	f := args.(*funcData)
 	var err error
 	*resp, err = s.Impl.Call(f.Name, f.Args...)
 	if err != nil {
-		log.Error().Err(err).Interface("args", args).Msg("rpc Call() execution failed")
+		logger.Error("rpc Call() execution failed", "args", args, "error", err)
 		return err
 	}
 	return nil

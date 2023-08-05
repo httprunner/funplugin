@@ -4,15 +4,13 @@ import (
 	"fmt"
 	"reflect"
 	"strings"
-
-	"github.com/rs/zerolog/log"
 )
 
 // CallFunc calls function with arguments
 func CallFunc(fn reflect.Value, args ...interface{}) (interface{}, error) {
 	argumentsValue, err := convertArgs(fn, args...)
 	if err != nil {
-		log.Error().Err(err).Msg("convert arguments failed")
+		Logger.Error("convert arguments failed", "error", err)
 		return nil, err
 	}
 	return call(fn, argumentsValue)

@@ -7,12 +7,14 @@ import (
 
 	hclog "github.com/hashicorp/go-hclog"
 	"github.com/hashicorp/go-plugin"
-	"github.com/rs/zerolog/log"
 
 	"github.com/httprunner/funplugin/shared"
 )
 
-var Version = shared.Version
+var (
+	Version = shared.Version
+	logger  = shared.Logger.Named("fungo")
+)
 
 // functionsMap stores plugin functions
 type functionsMap map[string]reflect.Value
@@ -28,6 +30,7 @@ func (p *functionPlugin) GetNames() ([]string, error) {
 	for name := range p.functions {
 		names = append(names, name)
 	}
+	p.logger.Debug("get function names", "names", names)
 	return names, nil
 }
 
@@ -58,13 +61,10 @@ func Register(funcName string, fn interface{}) {
 // serveRPC starts a plugin server process in RPC mode.
 func serveRPC() {
 	rpcPluginName := "rpc"
-	log.Info().Msg("start plugin server in RPC mode")
+	logger = logger.Named(rpcPluginName)
+	logger.Info("start plugin server in RPC mode")
 	funcPlugin := &functionPlugin{
-		logger: hclog.New(&hclog.LoggerOptions{
-			Name:   rpcPluginName,
-			Output: os.Stdout,
-			Level:  hclog.Info,
-		}),
+		logger:    logger,
 		functions: functions,
 	}
 	var pluginMap = map[string]plugin.Plugin{
@@ -80,13 +80,10 @@ func serveRPC() {
 // serveGRPC starts a plugin server process in gRPC mode.
 func serveGRPC() {
 	grpcPluginName := "grpc"
-	log.Info().Msg("start plugin server in gRPC mode")
+	logger = logger.Named(grpcPluginName)
+	logger.Info("start plugin server in gRPC mode")
 	funcPlugin := &functionPlugin{
-		logger: hclog.New(&hclog.LoggerOptions{
-			Name:   grpcPluginName,
-			Output: os.Stdout,
-			Level:  hclog.Info,
-		}),
+		logger:    logger,
 		functions: functions,
 	}
 	var pluginMap = map[string]plugin.Plugin{

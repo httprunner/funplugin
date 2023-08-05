@@ -6,8 +6,6 @@ import (
 	"reflect"
 	"runtime"
 
-	"github.com/rs/zerolog/log"
-
 	"github.com/httprunner/funplugin/shared"
 )
 
@@ -20,17 +18,17 @@ type goPlugin struct {
 
 func newGoPlugin(path string) (*goPlugin, error) {
 	if runtime.GOOS == "windows" {
-		log.Warn().Msg("go plugin does not support windows")
+		logger.Warn("go plugin does not support windows")
 		return nil, fmt.Errorf("go plugin does not support windows")
 	}
 
 	plg, err := plugin.Open(path)
 	if err != nil {
-		log.Error().Err(err).Str("path", path).Msg("load go plugin failed")
+		logger.Error("load go plugin failed", "path", path, "error", err)
 		return nil, err
 	}
 
-	log.Info().Str("path", path).Msg("load go plugin success")
+	logger.Info("load go plugin success", "path", path)
 	p := &goPlugin{
 		Plugin:          plg,
 		path:            path,

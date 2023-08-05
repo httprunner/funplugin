@@ -9,7 +9,6 @@ import (
 	"github.com/hashicorp/go-hclog"
 	"github.com/hashicorp/go-plugin"
 	"github.com/pkg/errors"
-	"github.com/rs/zerolog/log"
 
 	"github.com/httprunner/funplugin/fungo"
 	"github.com/httprunner/funplugin/shared"
@@ -49,16 +48,13 @@ func newHashicorpPlugin(path string, option *pluginOption) (*hashicorpPlugin, er
 	}
 
 	// logger
-	loggerOptions := &hclog.LoggerOptions{
-		Name:   fmt.Sprintf("%v-%v", p.rpcType, p.option.langType),
-		Output: os.Stdout,
-	}
-	if p.option.logOn {
-		log.Info().Msg("enable plugin log")
-		loggerOptions.Level = hclog.Debug
+	logger = logger.Named(fmt.Sprintf("%v-%v", p.rpcType, p.option.langType))
+	if p.option.debugLogger {
+		logger.Info("set plugin log level to DEBUG")
+		logger.SetLevel(hclog.Debug)
 	} else {
-		log.Info().Msg("disable plugin log")
-		loggerOptions.Level = hclog.Info
+		logger.Info("set plugin log level to INFO")
+		logger.SetLevel(hclog.Info)
 	}
 
 	// cmd
@@ -80,7 +76,7 @@ func newHashicorpPlugin(path string, option *pluginOption) (*hashicorpPlugin, er
 			rpcTypeGRPC.String(): &fungo.GRPCPlugin{},
 		},
 		Cmd:    cmd,
-		Logger: hclog.New(loggerOptions),
+		Logger: logger,
 		AllowedProtocols: []plugin.Protocol{
 			plugin.ProtocolNetRPC,
 			plugin.ProtocolGRPC,
@@ -104,7 +100,7 @@ func newHashicorpPlugin(path string, option *pluginOption) (*hashicorpPlugin, er
 	p.funcCaller = raw.(shared.IFuncCaller)
 
 	p.cachedFunctions = sync.Map{}
-	log.Info().Str("path", path).Msg("load hashicorp go plugin success")
+	logger.Info("load hashicorp go plugin success", "path", path)
 
 	return p, nil
 }
@@ -145,7 +141,7 @@ func (p *hashicorpPlugin) Call(funcName string, args ...interface{}) (interface{
 
 func (p *hashicorpPlugin) Quit() error {
 	// kill hashicorp plugin process
-	log.Info().Msg("quit hashicorp plugin process")
+	logger.Info("quit hashicorp plugin process")
 	p.client.Kill()
 	return nil
 }

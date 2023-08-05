@@ -8,12 +8,11 @@ import (
 	"runtime"
 	"testing"
 
-	"github.com/rs/zerolog/log"
 	"github.com/stretchr/testify/assert"
 )
 
 func buildHashicorpGoPlugin() {
-	log.Info().Msg("[init] build hashicorp go plugin")
+	logger.Info("[init] build hashicorp go plugin")
 	cmd := exec.Command("go", "build",
 		"-o", "fungo/examples/debugtalk.bin",
 		"fungo/examples/hashicorp.go", "fungo/examples/debugtalk.go")
@@ -23,7 +22,7 @@ func buildHashicorpGoPlugin() {
 }
 
 func removeHashicorpGoPlugin() {
-	log.Info().Msg("[teardown] remove hashicorp plugin")
+	logger.Info("[teardown] remove hashicorp plugin")
 	os.Remove("fungo/examples/debugtalk.bin")
 }
 
@@ -32,7 +31,7 @@ func TestHashicorpGoPlugin(t *testing.T) {
 	defer removeHashicorpGoPlugin()
 
 	plugin, err := Init("fungo/examples/debugtalk.bin",
-		WithLogOn(true))
+		WithDebugLogger(true))
 	if err != nil {
 		t.Fatal(err)
 	}

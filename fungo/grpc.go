@@ -5,7 +5,6 @@ import (
 
 	"github.com/hashicorp/go-plugin"
 	"github.com/pkg/errors"
-	"github.com/rs/zerolog/log"
 	"google.golang.org/grpc"
 
 	"github.com/httprunner/funplugin/fungo/protoGen"
@@ -22,17 +21,17 @@ type functionGRPCClient struct {
 }
 
 func (m *functionGRPCClient) GetNames() ([]string, error) {
-	log.Info().Msg("function GetNames called on host side")
+	logger.Info("function GetNames called on host side")
 	resp, err := m.client.GetNames(context.Background(), &protoGen.Empty{})
 	if err != nil {
-		log.Error().Err(err).Msg("gRPC call GetNames() failed")
+		logger.Error("gRPC call GetNames() failed", "error", err)
 		return nil, err
 	}
 	return resp.Names, err
 }
 
 func (m *functionGRPCClient) Call(funcName string, funcArgs ...interface{}) (interface{}, error) {
-	log.Info().Str("funcName", funcName).Interface("funcArgs", funcArgs).Msg("call function via gRPC")
+	logger.Info("call function via gRPC", "funcName", funcName, "funcArgs", funcArgs)
 
 	funcArgBytes, err := json.Marshal(funcArgs)
 	if err != nil {
@@ -45,9 +44,11 @@ func (m *functionGRPCClient) Call(funcName string, funcArgs ...interface{}) (int
 
 	response, err := m.client.Call(context.Background(), req)
 	if err != nil {
-		log.Error().Err(err).
-			Str("funcName", funcName).Interface("funcArgs", funcArgs).
-			Msg("gRPC Call() failed")
+		logger.Error("gRPC Call() failed",
+			"funcName", funcName,
+			"funcArgs", funcArgs,
+			"error", err,
+		)
 		return nil, err
 	}
 
@@ -66,10 +67,10 @@ type functionGRPCServer struct {
 }
 
 func (m *functionGRPCServer) GetNames(ctx context.Context, req *protoGen.Empty) (*protoGen.GetNamesResponse, error) {
-	log.Info().Interface("req", req).Msg("gRPC GetNames() called on plugin side")
+	logger.Info("gRPC GetNames() called on plugin side", "req", req)
 	v, err := m.Impl.GetNames()
 	if err != nil {
-		log.Error().Err(err).Msg("gRPC GetNames() execution failed")
+		logger.Error("gRPC GetNames() execution failed", "error", err)
 		return nil, err
 	}
 	return &protoGen.GetNamesResponse{Names: v}, err
@@ -81,11 +82,11 @@ func (m *functionGRPCServer) Call(ctx context.Context, req *protoGen.CallRequest
 		return nil, errors.Wrap(err, "failed to unmarshal Call() funcArgs")
 	}
 
-	log.Info().Interface("req", req).Msg("gRPC Call() called on plugin side")
+	logger.Info("gRPC Call() called on plugin side", "req", req)
 
 	v, err := m.Impl.Call(req.Name, funcArgs...)
 	if err != nil {
-		log.Error().Err(err).Interface("req", req).Msg("gRPC Call() execution failed")
+		logger.Error("gRPC Call() execution failed", "req", req, "error", err)
 		return nil, err
 	}
 

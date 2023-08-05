@@ -5,7 +5,11 @@ import (
 	"fmt"
 	"path/filepath"
 
-	"github.com/rs/zerolog/log"
+	"github.com/httprunner/funplugin/shared"
+)
+
+var (
+	logger = shared.Logger
 )
 
 type IPlugin interface {
@@ -25,16 +29,16 @@ const (
 )
 
 type pluginOption struct {
-	logOn    bool
-	langType langType // go or py
-	python3  string   // python3 path with funppy dependency
+	debugLogger bool
+	langType    langType // go or py
+	python3     string   // python3 path with funppy dependency
 }
 
 type Option func(*pluginOption)
 
-func WithLogOn(logOn bool) Option {
+func WithDebugLogger(debug bool) Option {
 	return func(o *pluginOption) {
-		o.logOn = logOn
+		o.debugLogger = debug
 	}
 }
 
@@ -50,6 +54,7 @@ func Init(path string, options ...Option) (plugin IPlugin, err error) {
 	for _, o := range options {
 		o(option)
 	}
+	logger.Info("init plugin", "path", path)
 
 	// priority: hashicorp plugin > go plugin
 	ext := filepath.Ext(path)
@@ -69,7 +74,7 @@ func Init(path string, options ...Option) (plugin IPlugin, err error) {
 		// found go plugin file
 		return newGoPlugin(path)
 	default:
-		log.Error().Err(err).Msgf("invalid plugin path: %s", path)
+		logger.Error("invalid plugin path", "path", path, "error", err)
 		return nil, fmt.Errorf("unsupported plugin type: %s", ext)
 	}
 }
