@@ -11,7 +11,6 @@ import (
 	"github.com/pkg/errors"
 
 	"github.com/httprunner/funplugin/fungo"
-	"github.com/httprunner/funplugin/shared"
 )
 
 type rpcType string
@@ -29,7 +28,7 @@ func (t rpcType) String() string {
 type hashicorpPlugin struct {
 	client          *plugin.Client
 	rpcType         rpcType
-	funcCaller      shared.IFuncCaller
+	funcCaller      fungo.IFuncCaller
 	cachedFunctions sync.Map // cache loaded functions to improve performance, key is function name, value is bool
 	path            string   // plugin file path
 	option          *pluginOption
@@ -42,7 +41,7 @@ func newHashicorpPlugin(path string, option *pluginOption) (*hashicorpPlugin, er
 	}
 
 	// plugin type, grpc or rpc
-	p.rpcType = rpcType(os.Getenv(shared.PluginTypeEnvName))
+	p.rpcType = rpcType(os.Getenv(fungo.PluginTypeEnvName))
 	if p.rpcType != rpcTypeRPC {
 		p.rpcType = rpcTypeGRPC // default
 	}
@@ -66,12 +65,12 @@ func newHashicorpPlugin(path string, option *pluginOption) (*hashicorpPlugin, er
 		// hashicorp go plugin
 		cmd = exec.Command(path)
 	}
-	cmd.Env = append(os.Environ(), fmt.Sprintf("%s=%s", shared.PluginTypeEnvName, p.rpcType))
+	cmd.Env = append(os.Environ(), fmt.Sprintf("%s=%s", fungo.PluginTypeEnvName, p.rpcType))
 
 	// launch the plugin process
 	logger.Info("launch the plugin process")
 	p.client = plugin.NewClient(&plugin.ClientConfig{
-		HandshakeConfig: shared.HandshakeConfig,
+		HandshakeConfig: fungo.HandshakeConfig,
 		Plugins: map[string]plugin.Plugin{
 			rpcTypeRPC.String():  &fungo.RPCPlugin{},
 			rpcTypeGRPC.String(): &fungo.GRPCPlugin{},
@@ -98,7 +97,7 @@ func newHashicorpPlugin(path string, option *pluginOption) (*hashicorpPlugin, er
 
 	// We should have a Function now! This feels like a normal interface
 	// implementation but is in fact over an RPC connection.
-	p.funcCaller = raw.(shared.IFuncCaller)
+	p.funcCaller = raw.(fungo.IFuncCaller)
 
 	p.cachedFunctions = sync.Map{}
 	logger.Info("load hashicorp go plugin success", "path", path)

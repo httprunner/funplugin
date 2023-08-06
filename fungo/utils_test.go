@@ -1,4 +1,4 @@
-package shared
+package fungo
 
 import (
 	"errors"

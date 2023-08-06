@@ -5,11 +5,11 @@ import (
 	"fmt"
 	"path/filepath"
 
-	"github.com/httprunner/funplugin/shared"
+	"github.com/httprunner/funplugin/fungo"
 )
 
 var (
-	logger = shared.Logger
+	logger = fungo.Logger
 )
 
 type IPlugin interface {

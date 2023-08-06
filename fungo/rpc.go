@@ -5,8 +5,6 @@ import (
 	"net/rpc"
 
 	"github.com/hashicorp/go-plugin"
-
-	"github.com/httprunner/funplugin/shared"
 )
 
 func init() {
@@ -61,7 +59,7 @@ func (g *functionRPCClient) Call(funcName string, funcArgs ...interface{}) (inte
 
 // functionRPCServer runs on the plugin side, executing the user custom function.
 type functionRPCServer struct {
-	Impl shared.IFuncCaller
+	Impl IFuncCaller
 }
 
 // plugin execution
@@ -93,7 +91,7 @@ func (s *functionRPCServer) Call(args interface{}, resp *interface{}) error {
 
 // RPCPlugin implements hashicorp's plugin.Plugin.
 type RPCPlugin struct {
-	Impl shared.IFuncCaller
+	Impl IFuncCaller
 }
 
 func (p *RPCPlugin) Server(*plugin.MuxBroker) (interface{}, error) {

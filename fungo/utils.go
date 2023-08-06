@@ -1,4 +1,4 @@
-package shared
+package fungo
 
 import (
 	"fmt"
@@ -10,7 +10,7 @@ import (
 func CallFunc(fn reflect.Value, args ...interface{}) (interface{}, error) {
 	argumentsValue, err := convertArgs(fn, args...)
 	if err != nil {
-		Logger.Error("convert arguments failed", "error", err)
+		logger.Error("convert arguments failed", "error", err)
 		return nil, err
 	}
 	return call(fn, argumentsValue)

@@ -8,7 +8,6 @@ import (
 	"google.golang.org/grpc"
 
 	"github.com/httprunner/funplugin/fungo/protoGen"
-	"github.com/httprunner/funplugin/shared"
 	jsoniter "github.com/json-iterator/go"
 )
 
@@ -65,7 +64,7 @@ func (m *functionGRPCClient) Call(funcName string, funcArgs ...interface{}) (int
 // Here is the gRPC server that functionGRPCClient talks to.
 type functionGRPCServer struct {
 	protoGen.UnimplementedDebugTalkServer
-	Impl shared.IFuncCaller
+	Impl IFuncCaller
 }
 
 func (m *functionGRPCServer) GetNames(ctx context.Context, req *protoGen.Empty) (*protoGen.GetNamesResponse, error) {
@@ -104,7 +103,7 @@ func (m *functionGRPCServer) Call(ctx context.Context, req *protoGen.CallRequest
 // GRPCPlugin implements hashicorp's plugin.GRPCPlugin.
 type GRPCPlugin struct {
 	plugin.Plugin
-	Impl shared.IFuncCaller
+	Impl IFuncCaller
 }
 
 func (p *GRPCPlugin) GRPCServer(broker *plugin.GRPCBroker, s *grpc.Server) error {

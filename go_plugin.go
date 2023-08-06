@@ -6,7 +6,7 @@ import (
 	"reflect"
 	"runtime"
 
-	"github.com/httprunner/funplugin/shared"
+	"github.com/httprunner/funplugin/fungo"
 )
 
 // goPlugin implements golang official plugin
@@ -74,7 +74,7 @@ func (p *goPlugin) Call(funcName string, args ...interface{}) (interface{}, erro
 		return nil, fmt.Errorf("function %s not found", funcName)
 	}
 	fn := p.cachedFunctions[funcName]
-	return shared.CallFunc(fn, args...)
+	return fungo.CallFunc(fn, args...)
 }
 
 func (p *goPlugin) Quit() error {

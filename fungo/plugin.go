@@ -7,13 +7,6 @@ import (
 
 	hclog "github.com/hashicorp/go-hclog"
 	"github.com/hashicorp/go-plugin"
-
-	"github.com/httprunner/funplugin/shared"
-)
-
-var (
-	Version = shared.Version
-	logger  = shared.Logger.Named("fungo")
 )
 
 // functionsMap stores plugin functions
@@ -43,7 +36,7 @@ func (p *functionPlugin) Call(funcName string, args ...interface{}) (interface{}
 		return nil, fmt.Errorf("function %s not found", funcName)
 	}
 
-	return shared.CallFunc(fn, args...)
+	return CallFunc(fn, args...)
 }
 
 var functions = make(functionsMap)
@@ -57,7 +50,7 @@ func Register(funcName string, fn interface{}) {
 	logger.Info("register plugin function", "funcName", funcName)
 	functions[funcName] = reflect.ValueOf(fn)
 	// automatic registration with common name
-	functions[shared.ConvertCommonName(funcName)] = functions[funcName]
+	functions[ConvertCommonName(funcName)] = functions[funcName]
 }
 
 // serveRPC starts a plugin server process in RPC mode.
@@ -74,7 +67,7 @@ func serveRPC() {
 	}
 	// start RPC server
 	plugin.Serve(&plugin.ServeConfig{
-		HandshakeConfig: shared.HandshakeConfig,
+		HandshakeConfig: HandshakeConfig,
 		Plugins:         pluginMap,
 	})
 }
@@ -93,7 +86,7 @@ func serveGRPC() {
 	}
 	// start gRPC server
 	plugin.Serve(&plugin.ServeConfig{
-		HandshakeConfig: shared.HandshakeConfig,
+		HandshakeConfig: HandshakeConfig,
 		Plugins:         pluginMap,
 		GRPCServer:      plugin.DefaultGRPCServer,
 	})
@@ -101,7 +94,7 @@ func serveGRPC() {
 
 // default to run plugin in gRPC mode
 func Serve() {
-	if os.Getenv(shared.PluginTypeEnvName) == "rpc" {
+	if os.Getenv(PluginTypeEnvName) == "rpc" {
 		serveRPC()
 	} else {
 		// default
