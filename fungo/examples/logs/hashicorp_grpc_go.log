@@ -1,0 +1,77 @@
+[INFO]  fungo: set plugin log level: level=debug
+[INFO]  fungo: init plugin: path=fungo/examples/debugtalk.bin
+[INFO]  hc-grpc-go: launch the plugin process
+[DEBUG] hc-grpc-go: starting plugin: path=fungo/examples/debugtalk.bin args=["fungo/examples/debugtalk.bin"]
+[DEBUG] hc-grpc-go: plugin started: path=fungo/examples/debugtalk.bin pid=63329
+[DEBUG] hc-grpc-go: waiting for RPC address: path=fungo/examples/debugtalk.bin
+[DEBUG] hc-grpc-go.debugtalk.bin: 2023/08/06 23:44:26 plugin init function called
+[INFO]  hc-grpc-go.debugtalk.bin: [INFO]  fungo: register plugin function: funcName=sum_ints
+[INFO]  hc-grpc-go.debugtalk.bin: [INFO]  fungo: register plugin function: funcName=sum_two_int
+[INFO]  hc-grpc-go.debugtalk.bin: [INFO]  fungo: register plugin function: funcName=sum
+[INFO]  hc-grpc-go.debugtalk.bin: [INFO]  fungo: register plugin function: funcName=sum_two_string
+[INFO]  hc-grpc-go.debugtalk.bin: [INFO]  fungo: register plugin function: funcName=sum_strings
+[INFO]  hc-grpc-go.debugtalk.bin: [INFO]  fungo: register plugin function: funcName=concatenate
+[INFO]  hc-grpc-go.debugtalk.bin: [INFO]  fungo: register plugin function: funcName=setup_hook_example
+[INFO]  hc-grpc-go.debugtalk.bin: [INFO]  fungo: register plugin function: funcName=teardown_hook_example
+[INFO]  hc-grpc-go.debugtalk.bin: [INFO]  fungo: start plugin server in gRPC mode
+[DEBUG] hc-grpc-go: using plugin: version=1
+[DEBUG] hc-grpc-go.debugtalk.bin: plugin address: address=/var/folders/nm/6prc3p4s2tg_27_3fwfv22vh0000gp/T/plugin3126265366 network=unix timestamp="2023-08-06T23:44:26.511+0800"
+[INFO]  hc-grpc-go: load hashicorp go plugin success: path=fungo/examples/debugtalk.bin
+[DEBUG] hc-grpc-go: check if plugin has function: funcName=sum_ints
+[DEBUG] fungo: gRPC_client GetNames() start
+[DEBUG] hc-grpc-go.debugtalk.bin: [DEBUG] fungo: gRPC_server GetNames() start
+[DEBUG] hc-grpc-go.debugtalk.bin: [DEBUG] fungo.func_exec: get registered plugin functions: names=["sum_ints", "sumstrings", "sum_strings", "setup_hook_example", "setuphookexample", "teardown_hook_example", "sumtwoint", "sumtwostring", "teardownhookexample", "sumints", "sum_two_int", "sum", "sum_two_string", "concatenate"]
+[DEBUG] hc-grpc-go.debugtalk.bin: [DEBUG] fungo: gRPC_server GetNames() success
+[DEBUG] fungo: gRPC_client GetNames() success
+[DEBUG] hc-grpc-go: check if plugin has function: funcName=concatenate
+[DEBUG] fungo: gRPC_client GetNames() start
+[DEBUG] hc-grpc-go.debugtalk.bin: [DEBUG] fungo: gRPC_server GetNames() start
+[DEBUG] hc-grpc-go.debugtalk.bin: [DEBUG] fungo.func_exec: get registered plugin functions: names=["sumtwoint", "sumtwostring", "teardownhookexample", "sumints", "sum_two_int", "sum", "sum_two_string", "concatenate", "sum_ints", "sumstrings", "sum_strings", "setup_hook_example", "setuphookexample", "teardown_hook_example"]
+[DEBUG] hc-grpc-go.debugtalk.bin: [DEBUG] fungo: gRPC_server GetNames() success
+[DEBUG] fungo: gRPC_client GetNames() success
+[INFO]  fungo: gRPC_client Call() start: funcName=sum_ints funcArgs=[1, 2, 3, 4]
+[DEBUG] hc-grpc-go.debugtalk.bin: [DEBUG] fungo: gRPC_server Call() start
+[DEBUG] hc-grpc-go.debugtalk.bin: [DEBUG] fungo.func_exec: plugin function execution: funcName=sum_ints args=[1, 2, 3, 4]
+[DEBUG] hc-grpc-go.debugtalk.bin: [DEBUG] fungo: gRPC_server Call() success
+[INFO]  fungo: gRPC_client Call() success: result=10
+[INFO]  fungo: gRPC_client Call() start: funcName=sum_two_int funcArgs=[1, 2]
+[DEBUG] hc-grpc-go.debugtalk.bin: [DEBUG] fungo: gRPC_server Call() start
+[DEBUG] hc-grpc-go.debugtalk.bin: [DEBUG] fungo.func_exec: plugin function execution: funcName=sum_two_int args=[1, 2]
+[DEBUG] hc-grpc-go.debugtalk.bin: [DEBUG] fungo: gRPC_server Call() success
+[INFO]  fungo: gRPC_client Call() success: result=3
+[INFO]  fungo: gRPC_client Call() start: funcName=sum funcArgs=[1, 2, 3.4, 5]
+[DEBUG] hc-grpc-go.debugtalk.bin: [DEBUG] fungo: gRPC_server Call() start
+[DEBUG] hc-grpc-go.debugtalk.bin: [DEBUG] fungo.func_exec: plugin function execution: funcName=sum args=[1, 2, 3.4, 5]
+[DEBUG] hc-grpc-go.debugtalk.bin: [DEBUG] fungo: gRPC_server Call() success
+[INFO]  fungo: gRPC_client Call() success: result=11.4
+[INFO]  fungo: gRPC_client Call() start: funcName=sum_two_string funcArgs=[a, b]
+[DEBUG] hc-grpc-go.debugtalk.bin: [DEBUG] fungo: gRPC_server Call() start
+[DEBUG] hc-grpc-go.debugtalk.bin: [DEBUG] fungo.func_exec: plugin function execution: funcName=sum_two_string args=[a, b]
+[DEBUG] hc-grpc-go.debugtalk.bin: [DEBUG] fungo: gRPC_server Call() success
+[INFO]  fungo: gRPC_client Call() success: result=ab
+[INFO]  fungo: gRPC_client Call() start: funcName=sum_strings funcArgs=[a, b, c]
+[DEBUG] hc-grpc-go.debugtalk.bin: [DEBUG] fungo: gRPC_server Call() start
+[DEBUG] hc-grpc-go.debugtalk.bin: [DEBUG] fungo.func_exec: plugin function execution: funcName=sum_strings args=[a, b, c]
+[DEBUG] hc-grpc-go.debugtalk.bin: [DEBUG] fungo: gRPC_server Call() success
+[INFO]  fungo: gRPC_client Call() success: result=abc
+[INFO]  fungo: gRPC_client Call() start: funcName=concatenate funcArgs=[a, 2, c, 3.4]
+[INFO]  fungo: gRPC_client Call() success: result=a2c3.4
+[INFO]  hc-grpc-go: quit hashicorp plugin process
+[DEBUG] hc-grpc-go.debugtalk.bin: [DEBUG] fungo: gRPC_server Call() start
+[DEBUG] hc-grpc-go.debugtalk.bin: [DEBUG] fungo.func_exec: plugin function execution: funcName=concatenate args=[a, 2, c, 3.4]
+[DEBUG] hc-grpc-go.debugtalk.bin: [DEBUG] fungo: gRPC_server Call() success
+[DEBUG] hc-grpc-go.stdio: received EOF, stopping recv loop: err="rpc error: code = Unavailable desc = error reading from server: EOF"
+[INFO]  hc-grpc-go: plugin process exited: path=fungo/examples/debugtalk.bin pid=63329
+[DEBUG] hc-grpc-go: plugin exited
+[INFO]  hc-grpc-go: [teardown test] remove hashicorp plugin: path=fungo/examples/debugtalk.bin
+O]  fungo: gRPC_client Call() success: result=abc
+[INFO]  fungo: gRPC_client Call() start: funcName=concatenate funcArgs=[a, 2, c, 3.4]
+[DEBUG] hc-grpc-go.debugtalk.bin: 2023-08-06T23:42:36.210+0800 [DEBUG] fungo: gRPC_server Call() start
+[DEBUG] hc-grpc-go.debugtalk.bin: 2023-08-06T23:42:36.210+0800 [DEBUG] fungo.func_exec: plugin function execution: funcName=concatenate args=[a, 2, c, 3.4]
+[DEBUG] hc-grpc-go.debugtalk.bin: 2023-08-06T23:42:36.210+0800 [DEBUG] fungo: gRPC_server Call() success
+[INFO]  fungo: gRPC_client Call() success: result=a2c3.4
+[INFO]  hc-grpc-go: quit hashicorp plugin process
+[DEBUG] hc-grpc-go.stdio: received EOF, stopping recv loop: err="rpc error: code = Unavailable desc = error reading from server: EOF"
+[INFO]  hc-grpc-go: plugin process exited: path=fungo/examples/debugtalk.bin pid=62304
+[DEBUG] hc-grpc-go: plugin exited
+[INFO]  hc-grpc-go: [teardown test] remove hashicorp plugin: path=fungo/examples/debugtalk.bin

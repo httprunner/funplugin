@@ -37,6 +37,8 @@ func Init(path string, options ...Option) (plugin IPlugin, err error)
 - path: built plugin file path
 - options: specify extra plugin options
   - WithDebugLogger(debug bool): whether to print debug level logs in plugin process
+  - WithLogFile(logFile string): specify log file path
+  - WithDisableTime(disable bool): whether disable log time
   - WithPython3(python3 string): specify custom python3 path
 
 2, call plugin API to deal with plugin functions.

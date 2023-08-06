@@ -78,5 +78,8 @@ $ go build -o fungo/examples/xxx.bin fungo/examples/hashicorp.go fungo/examples/
 
 Finally, you can use `Init` to initialize plugin via the `xxx.bin` path, and you can call the plugin API to handle plugin functionality.
 
+The complete log example can be found in the file [hashicorp_grpc_go.log].
+
 
 [fungo/examples/]: ../fungo/examples/
+[hashicorp_grpc_go.log]: ../fungo/examples/logs/hashicorp_grpc_go.log

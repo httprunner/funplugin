@@ -30,9 +30,11 @@ const (
 )
 
 type pluginOption struct {
-	debugLogger bool
-	langType    langType // go or py
-	python3     string   // python3 path with funppy dependency
+	debugLogger    bool     // whether set log level to DEBUG
+	logFile        string   // specify log file path
+	disableLogTime bool     // whether disable log time
+	langType       langType // go or py
+	python3        string   // python3 path with funppy dependency
 }
 
 type Option func(*pluginOption)
@@ -40,6 +42,18 @@ type Option func(*pluginOption)
 func WithDebugLogger(debug bool) Option {
 	return func(o *pluginOption) {
 		o.debugLogger = debug
+	}
+}
+
+func WithLogFile(logFile string) Option {
+	return func(o *pluginOption) {
+		o.logFile = logFile
+	}
+}
+
+func WithDisableTime(disable bool) Option {
+	return func(o *pluginOption) {
+		o.disableLogTime = disable
 	}
 }
 
@@ -56,15 +70,15 @@ func Init(path string, options ...Option) (plugin IPlugin, err error) {
 		o(option)
 	}
 
-	// logger
-	logger.Info("init plugin", "path", path)
+	// init logger
+	logLevel := hclog.Info
 	if option.debugLogger {
-		logger.Info("set plugin log level to DEBUG")
-		logger.SetLevel(hclog.Debug)
-	} else {
-		logger.Info("set plugin log level to INFO")
-		logger.SetLevel(hclog.Info)
+		logLevel = hclog.Debug
 	}
+	logger = fungo.InitLogger(
+		logLevel, option.logFile, option.disableLogTime)
+
+	logger.Info("init plugin", "path", path)
 
 	// priority: hashicorp plugin > go plugin
 	ext := filepath.Ext(path)

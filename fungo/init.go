@@ -1,6 +1,9 @@
 package fungo
 
 import (
+	"io"
+	"os"
+
 	hclog "github.com/hashicorp/go-hclog"
 	"github.com/hashicorp/go-plugin"
 )
@@ -14,10 +17,32 @@ var (
 var Logger = hclog.New(&hclog.LoggerOptions{
 	Name:        "fungo",
 	Output:      hclog.DefaultOutput,
-	DisableTime: false,
+	DisableTime: true,
 	Level:       hclog.Debug,
 	Color:       hclog.AutoColor,
 })
+
+func InitLogger(logLevel hclog.Level, logFile string, disableTime bool) hclog.Logger {
+	output := hclog.DefaultOutput
+	if logFile != "" {
+		file, err := os.OpenFile(logFile, os.O_CREATE|os.O_RDWR, 0666)
+		if err != nil {
+			logger.Error("open log file failed", "error", err)
+			os.Exit(1)
+		}
+		output = io.MultiWriter(hclog.DefaultOutput, file)
+	}
+
+	logger = hclog.New(&hclog.LoggerOptions{
+		Name:        "fungo",
+		Output:      output,
+		DisableTime: disableTime,
+		Level:       logLevel,
+		Color:       hclog.AutoColor,
+	})
+	logger.Info("set plugin log level", "level", logLevel.String())
+	return logger
+}
 
 // PluginTypeEnvName is used to specify hashicorp go plugin type, rpc/grpc
 const PluginTypeEnvName = "HRP_PLUGIN_TYPE"
