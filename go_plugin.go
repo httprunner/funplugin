@@ -22,6 +22,9 @@ func newGoPlugin(path string) (*goPlugin, error) {
 		return nil, fmt.Errorf("go plugin does not support windows")
 	}
 
+	// logger
+	logger = logger.ResetNamed("go-plugin")
+
 	plg, err := plugin.Open(path)
 	if err != nil {
 		logger.Error("load go plugin failed", "path", path, "error", err)

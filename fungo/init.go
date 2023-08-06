@@ -12,10 +12,11 @@ var (
 )
 
 var Logger = hclog.New(&hclog.LoggerOptions{
-	Name:   "fungo",
-	Output: hclog.DefaultOutput,
-	Level:  hclog.Debug,
-	Color:  hclog.AutoColor,
+	Name:        "fungo",
+	Output:      hclog.DefaultOutput,
+	DisableTime: false,
+	Level:       hclog.Debug,
+	Color:       hclog.AutoColor,
 })
 
 // PluginTypeEnvName is used to specify hashicorp go plugin type, rpc/grpc

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"path/filepath"
 
+	"github.com/hashicorp/go-hclog"
 	"github.com/httprunner/funplugin/fungo"
 )
 
@@ -54,7 +55,16 @@ func Init(path string, options ...Option) (plugin IPlugin, err error) {
 	for _, o := range options {
 		o(option)
 	}
+
+	// logger
 	logger.Info("init plugin", "path", path)
+	if option.debugLogger {
+		logger.Info("set plugin log level to DEBUG")
+		logger.SetLevel(hclog.Debug)
+	} else {
+		logger.Info("set plugin log level to INFO")
+		logger.SetLevel(hclog.Info)
+	}
 
 	// priority: hashicorp plugin > go plugin
 	ext := filepath.Ext(path)

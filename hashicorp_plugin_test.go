@@ -8,6 +8,7 @@ import (
 	"runtime"
 	"testing"
 
+	"github.com/httprunner/funplugin/fungo"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -28,10 +29,25 @@ func removeHashicorpGoPlugin() {
 	os.Remove(pluginBinPath)
 }
 
-func TestHashicorpGoPlugin(t *testing.T) {
+func TestHashicorpGRPCGoPlugin(t *testing.T) {
 	buildHashicorpGoPlugin()
 	defer removeHashicorpGoPlugin()
 
+	plugin, err := Init("fungo/examples/debugtalk.bin",
+		WithDebugLogger(true))
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer plugin.Quit()
+
+	assertPlugin(t, plugin)
+}
+
+func TestHashicorpRPCGoPlugin(t *testing.T) {
+	buildHashicorpGoPlugin()
+	defer removeHashicorpGoPlugin()
+
+	os.Setenv(fungo.PluginTypeEnvName, "rpc")
 	plugin, err := Init("fungo/examples/debugtalk.bin",
 		WithDebugLogger(true))
 	if err != nil {

@@ -57,9 +57,8 @@ func Register(funcName string, fn interface{}) {
 func serveRPC() {
 	rpcPluginName := "rpc"
 	logger.Info("start plugin server in RPC mode")
-	logger = logger.Named(rpcPluginName)
 	funcPlugin := &functionPlugin{
-		logger:    logger,
+		logger:    logger.Named("func_exec"),
 		functions: functions,
 	}
 	var pluginMap = map[string]plugin.Plugin{
@@ -76,9 +75,8 @@ func serveRPC() {
 func serveGRPC() {
 	grpcPluginName := "grpc"
 	logger.Info("start plugin server in gRPC mode")
-	logger = logger.Named(grpcPluginName)
 	funcPlugin := &functionPlugin{
-		logger:    logger,
+		logger:    logger.Named("func_exec"),
 		functions: functions,
 	}
 	var pluginMap = map[string]plugin.Plugin{

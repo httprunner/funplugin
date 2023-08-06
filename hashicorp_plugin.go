@@ -6,7 +6,6 @@ import (
 	"os/exec"
 	"sync"
 
-	"github.com/hashicorp/go-hclog"
 	"github.com/hashicorp/go-plugin"
 	"github.com/pkg/errors"
 
@@ -47,14 +46,7 @@ func newHashicorpPlugin(path string, option *pluginOption) (*hashicorpPlugin, er
 	}
 
 	// logger
-	logger = logger.Named(fmt.Sprintf("%v-%v", p.rpcType, p.option.langType))
-	if p.option.debugLogger {
-		logger.Info("set plugin log level to DEBUG")
-		logger.SetLevel(hclog.Debug)
-	} else {
-		logger.Info("set plugin log level to INFO")
-		logger.SetLevel(hclog.Info)
-	}
+	logger = logger.ResetNamed(fmt.Sprintf("hc-%v-%v", p.rpcType, p.option.langType))
 
 	// cmd
 	var cmd *exec.Cmd
