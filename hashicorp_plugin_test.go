@@ -35,7 +35,7 @@ func TestHashicorpGRPCGoPlugin(t *testing.T) {
 
 	plugin, err := Init("fungo/examples/debugtalk.bin",
 		WithDebugLogger(true),
-		WithLogFile("fungo/examples/logs/hashicorp_grpc_go.log"),
+		WithLogFile("docs/logs/hashicorp_grpc_go.log"),
 		WithDisableTime(true))
 	if err != nil {
 		t.Fatal(err)
@@ -52,7 +52,7 @@ func TestHashicorpRPCGoPlugin(t *testing.T) {
 	os.Setenv(fungo.PluginTypeEnvName, "rpc")
 	plugin, err := Init("fungo/examples/debugtalk.bin",
 		WithDebugLogger(true),
-		WithLogFile("fungo/examples/logs/hashicorp_rpc_go.log"),
+		WithLogFile("docs/logs/hashicorp_rpc_go.log"),
 		WithDisableTime(true))
 	if err != nil {
 		t.Fatal(err)

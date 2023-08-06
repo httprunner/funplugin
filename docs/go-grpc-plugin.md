@@ -82,4 +82,4 @@ The complete log example can be found in the file [hashicorp_grpc_go.log].
 
 
 [fungo/examples/]: ../fungo/examples/
-[hashicorp_grpc_go.log]: ../fungo/examples/logs/hashicorp_grpc_go.log
+[hashicorp_grpc_go.log]: logs/hashicorp_grpc_go.log

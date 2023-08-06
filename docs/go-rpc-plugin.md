@@ -21,4 +21,4 @@ The complete log example can be found in the file [hashicorp_rpc_go.log].
 [golang plugin over gRPC]: go-grpc-plugin.md
 [examples/plugin/]: ../examples/plugin/
 [examples/plugin/debugtalk.go]: ../examples/plugin/debugtalk.go
-[hashicorp_rpc_go.log]: ../fungo/examples/logs/hashicorp_rpc_go.log
+[hashicorp_rpc_go.log]: logs/hashicorp_rpc_go.log
