@@ -22,10 +22,13 @@ var Logger = hclog.New(&hclog.LoggerOptions{
 	Color:       hclog.AutoColor,
 })
 
+var file *os.File
+
 func InitLogger(logLevel hclog.Level, logFile string, disableTime bool) hclog.Logger {
 	output := hclog.DefaultOutput
 	if logFile != "" {
-		file, err := os.OpenFile(logFile, os.O_CREATE|os.O_RDWR, 0666)
+		var err error
+		file, err = os.OpenFile(logFile, os.O_CREATE|os.O_RDWR, 0666)
 		if err != nil {
 			logger.Error("open log file failed", "error", err)
 			os.Exit(1)
@@ -42,6 +45,14 @@ func InitLogger(logLevel hclog.Level, logFile string, disableTime bool) hclog.Lo
 	})
 	logger.Info("set plugin log level", "level", logLevel.String())
 	return logger
+}
+
+func CloseLogFile() error {
+	if file != nil {
+		logger.Info("close log file")
+		return file.Close()
+	}
+	return nil
 }
 
 // PluginTypeEnvName is used to specify hashicorp go plugin type, rpc/grpc

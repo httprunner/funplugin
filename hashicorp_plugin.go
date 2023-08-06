@@ -136,5 +136,5 @@ func (p *hashicorpPlugin) Quit() error {
 	// kill hashicorp plugin process
 	logger.Info("quit hashicorp plugin process")
 	p.client.Kill()
-	return nil
+	return fungo.CloseLogFile()
 }
