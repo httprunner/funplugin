@@ -22,8 +22,8 @@ site/
 output/
 
 # built plugins
-.bin
-.so
+*.bin
+*.so
 
 # python files
 .venv
