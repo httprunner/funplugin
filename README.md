@@ -36,7 +36,7 @@ func Init(path string, options ...Option) (plugin IPlugin, err error)
 
 - path: built plugin file path
 - options: specify extra plugin options
-  - WithLogOn(logOn bool): whether to print logs in plugin functions
+  - WithDebugLogger(debug bool): whether to print debug level logs in plugin process
   - WithPython3(python3 string): specify custom python3 path
 
 2, call plugin API to deal with plugin functions.
@@ -52,7 +52,7 @@ type IPlugin interface {
 }
 ```
 
-- Type: returns plugin type
+- Type: returns plugin type, current available types are `go-plugin`/`hashicorp-rpc-go`/`hashicorp-grpc-go`/`hashicorp-grpc-py`
 - Has: check if plugin has a function
 - Call: call function with function name and arguments
 - Quit: quit plugin

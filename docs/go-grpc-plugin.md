@@ -7,7 +7,7 @@ It is recommended to use `golang plugin over gRPC` in most cases. This should be
 Before you develop your golang plugin, you need to install an dependency as SDK.
 
 ```bash
-$ go get github.com/httprunner/funplugin
+$ go get -u github.com/httprunner/funplugin
 ```
 
 ## create plugin functions
