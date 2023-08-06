@@ -21,17 +21,18 @@ type functionGRPCClient struct {
 }
 
 func (m *functionGRPCClient) GetNames() ([]string, error) {
-	logger.Debug("gRPC_client GetNames()")
+	logger.Debug("gRPC_client GetNames() start")
 	resp, err := m.client.GetNames(context.Background(), &protoGen.Empty{})
 	if err != nil {
-		logger.Error("gRPC call GetNames() failed", "error", err)
+		logger.Error("gRPC_client GetNames() failed", "error", err)
 		return nil, err
 	}
-	return resp.Names, err
+	logger.Debug("gRPC_client GetNames() success")
+	return resp.Names, nil
 }
 
 func (m *functionGRPCClient) Call(funcName string, funcArgs ...interface{}) (interface{}, error) {
-	logger.Info("gRPC_client Call()", "funcName", funcName, "funcArgs", funcArgs)
+	logger.Info("gRPC_client Call() start", "funcName", funcName, "funcArgs", funcArgs)
 
 	funcArgBytes, err := json.Marshal(funcArgs)
 	if err != nil {
@@ -68,17 +69,18 @@ type functionGRPCServer struct {
 }
 
 func (m *functionGRPCServer) GetNames(ctx context.Context, req *protoGen.Empty) (*protoGen.GetNamesResponse, error) {
-	logger.Debug("gRPC_server GetNames()")
+	logger.Debug("gRPC_server GetNames() start")
 	v, err := m.Impl.GetNames()
 	if err != nil {
 		logger.Error("gRPC_server GetNames() failed", "error", err)
 		return nil, err
 	}
-	return &protoGen.GetNamesResponse{Names: v}, err
+	logger.Debug("gRPC_server GetNames() success")
+	return &protoGen.GetNamesResponse{Names: v}, nil
 }
 
 func (m *functionGRPCServer) Call(ctx context.Context, req *protoGen.CallRequest) (*protoGen.CallResponse, error) {
-	logger.Debug("gRPC_server Call()")
+	logger.Debug("gRPC_server Call() start")
 
 	var funcArgs []interface{}
 	if err := json.Unmarshal(req.Args, &funcArgs); err != nil {
@@ -95,7 +97,8 @@ func (m *functionGRPCServer) Call(ctx context.Context, req *protoGen.CallRequest
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to marshal Call() response")
 	}
-	return &protoGen.CallResponse{Value: value}, err
+	logger.Debug("gRPC_server Call() success")
+	return &protoGen.CallResponse{Value: value}, nil
 }
 
 // GRPCPlugin implements hashicorp's plugin.GRPCPlugin.

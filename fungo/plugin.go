@@ -30,7 +30,7 @@ func (p *functionPlugin) GetNames() ([]string, error) {
 	for name := range p.functions {
 		names = append(names, name)
 	}
-	p.logger.Debug("get plugin function names", "names", names)
+	p.logger.Debug("get registered plugin functions", "names", names)
 	return names, nil
 }
 
@@ -54,6 +54,7 @@ func Register(funcName string, fn interface{}) {
 	if _, ok := functions[funcName]; ok {
 		return
 	}
+	logger.Info("register plugin function", "funcName", funcName)
 	functions[funcName] = reflect.ValueOf(fn)
 	// automatic registration with common name
 	functions[shared.ConvertCommonName(funcName)] = functions[funcName]
@@ -62,8 +63,8 @@ func Register(funcName string, fn interface{}) {
 // serveRPC starts a plugin server process in RPC mode.
 func serveRPC() {
 	rpcPluginName := "rpc"
-	logger = logger.Named(rpcPluginName)
 	logger.Info("start plugin server in RPC mode")
+	logger = logger.Named(rpcPluginName)
 	funcPlugin := &functionPlugin{
 		logger:    logger,
 		functions: functions,
@@ -81,8 +82,8 @@ func serveRPC() {
 // serveGRPC starts a plugin server process in gRPC mode.
 func serveGRPC() {
 	grpcPluginName := "grpc"
-	logger = logger.Named(grpcPluginName)
 	logger.Info("start plugin server in gRPC mode")
+	logger = logger.Named(grpcPluginName)
 	funcPlugin := &functionPlugin{
 		logger:    logger,
 		functions: functions,

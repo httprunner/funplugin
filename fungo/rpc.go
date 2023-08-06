@@ -25,19 +25,20 @@ type functionRPCClient struct {
 }
 
 func (g *functionRPCClient) GetNames() ([]string, error) {
-	logger.Debug("rpc_client GetNames()")
+	logger.Debug("rpc_client GetNames() start")
 	var resp []string
 	err := g.client.Call("Plugin.GetNames", new(interface{}), &resp)
 	if err != nil {
 		logger.Error("rpc_client GetNames() failed", "error", err)
 		return nil, err
 	}
+	logger.Debug("rpc_client GetNames() success")
 	return resp, nil
 }
 
 // host -> plugin
 func (g *functionRPCClient) Call(funcName string, funcArgs ...interface{}) (interface{}, error) {
-	logger.Info("rpc_client Call()", "funcName", funcName, "funcArgs", funcArgs)
+	logger.Info("rpc_client Call() start", "funcName", funcName, "funcArgs", funcArgs)
 	f := funcData{
 		Name: funcName,
 		Args: funcArgs,
@@ -65,19 +66,20 @@ type functionRPCServer struct {
 
 // plugin execution
 func (s *functionRPCServer) GetNames(args interface{}, resp *[]string) error {
-	logger.Debug("rpc_server GetNames()")
+	logger.Debug("rpc_server GetNames() start")
 	var err error
 	*resp, err = s.Impl.GetNames()
 	if err != nil {
 		logger.Error("rpc_server GetNames() failed", "error", err)
 		return err
 	}
+	logger.Debug("rpc_server GetNames() success")
 	return nil
 }
 
 // plugin execution
 func (s *functionRPCServer) Call(args interface{}, resp *interface{}) error {
-	logger.Debug("rpc_server Call()")
+	logger.Debug("rpc_server Call() start")
 	f := args.(*funcData)
 	var err error
 	*resp, err = s.Impl.Call(f.Name, f.Args...)
@@ -85,6 +87,7 @@ func (s *functionRPCServer) Call(args interface{}, resp *interface{}) error {
 		logger.Error("rpc_server Call() failed", "args", args, "error", err)
 		return err
 	}
+	logger.Debug("rpc_server Call() success")
 	return nil
 }
 
