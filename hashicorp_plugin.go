@@ -39,25 +39,26 @@ func newHashicorpPlugin(path string, option *pluginOption) (*hashicorpPlugin, er
 		option: option,
 	}
 
-	// plugin type, grpc or rpc
-	p.rpcType = rpcType(os.Getenv(fungo.PluginTypeEnvName))
-	if p.rpcType != rpcTypeRPC {
-		p.rpcType = rpcTypeGRPC // default
-	}
-
-	// logger
-	logger = logger.ResetNamed(fmt.Sprintf("hc-%v-%v", p.rpcType, p.option.langType))
-
 	// cmd
 	var cmd *exec.Cmd
 	if p.option.langType == langTypePython {
 		// hashicorp python plugin
 		cmd = exec.Command(p.option.python3, path)
+		// hashicorp python plugin only supports gRPC
+		p.rpcType = rpcTypeGRPC
 	} else {
 		// hashicorp go plugin
 		cmd = exec.Command(path)
+		// hashicorp go plugin supports grpc and rpc
+		p.rpcType = rpcType(os.Getenv(fungo.PluginTypeEnvName))
+		if p.rpcType != rpcTypeRPC {
+			p.rpcType = rpcTypeGRPC // default
+		}
 	}
 	cmd.Env = append(os.Environ(), fmt.Sprintf("%s=%s", fungo.PluginTypeEnvName, p.rpcType))
+
+	// logger
+	logger = logger.ResetNamed(fmt.Sprintf("hc-%v-%v", p.rpcType, p.option.langType))
 
 	// launch the plugin process
 	logger.Info("launch the plugin process")

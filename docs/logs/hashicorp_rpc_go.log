@@ -2,9 +2,9 @@
 [INFO]  fungo: init plugin: path=fungo/examples/debugtalk.bin
 [INFO]  hc-rpc-go: launch the plugin process
 [DEBUG] hc-rpc-go: starting plugin: path=fungo/examples/debugtalk.bin args=["fungo/examples/debugtalk.bin"]
-[DEBUG] hc-rpc-go: plugin started: path=fungo/examples/debugtalk.bin pid=72483
+[DEBUG] hc-rpc-go: plugin started: path=fungo/examples/debugtalk.bin pid=56263
 [DEBUG] hc-rpc-go: waiting for RPC address: path=fungo/examples/debugtalk.bin
-[DEBUG] hc-rpc-go.debugtalk.bin: 2023/08/07 00:15:33 plugin init function called
+[DEBUG] hc-rpc-go.debugtalk.bin: 2023/08/10 16:54:04 plugin init function called
 [INFO]  hc-rpc-go.debugtalk.bin: [INFO]  fungo: register plugin function: funcName=sum_ints
 [INFO]  hc-rpc-go.debugtalk.bin: [INFO]  fungo: register plugin function: funcName=sum_two_int
 [INFO]  hc-rpc-go.debugtalk.bin: [INFO]  fungo: register plugin function: funcName=sum
@@ -14,19 +14,19 @@
 [INFO]  hc-rpc-go.debugtalk.bin: [INFO]  fungo: register plugin function: funcName=setup_hook_example
 [INFO]  hc-rpc-go.debugtalk.bin: [INFO]  fungo: register plugin function: funcName=teardown_hook_example
 [INFO]  hc-rpc-go.debugtalk.bin: [INFO]  fungo: start plugin server in RPC mode
+[DEBUG] hc-rpc-go.debugtalk.bin: plugin address: address=/var/folders/nm/6prc3p4s2tg_27_3fwfv22vh0000gp/T/plugin3244638032 network=unix timestamp="2023-08-10T16:54:04.356+0800"
 [DEBUG] hc-rpc-go: using plugin: version=1
-[DEBUG] hc-rpc-go.debugtalk.bin: plugin address: address=/var/folders/nm/6prc3p4s2tg_27_3fwfv22vh0000gp/T/plugin4148870767 network=unix timestamp="2023-08-07T00:15:33.267+0800"
 [INFO]  hc-rpc-go: load hashicorp go plugin success: path=fungo/examples/debugtalk.bin
 [DEBUG] hc-rpc-go: check if plugin has function: funcName=sum_ints
 [DEBUG] fungo: rpc_client GetNames() start
 [DEBUG] hc-rpc-go.debugtalk.bin: [DEBUG] fungo: rpc_server GetNames() start
-[DEBUG] hc-rpc-go.debugtalk.bin: [DEBUG] fungo.func_exec: get registered plugin functions: names=["sum_ints", "sum_strings", "sumstrings", "concatenate", "sumints", "sum_two_string", "setuphookexample", "sumtwoint", "setup_hook_example", "teardownhookexample", "sum_two_int", "sum", "sumtwostring", "teardown_hook_example"]
+[DEBUG] hc-rpc-go.debugtalk.bin: [DEBUG] fungo.func_exec: get registered plugin functions: names=["sumtwoint", "sum_two_string", "sumtwostring", "teardown_hook_example", "sumstrings", "setup_hook_example", "setuphookexample", "sum_ints", "sumints", "sum_two_int", "sum", "sum_strings", "concatenate", "teardownhookexample"]
 [DEBUG] hc-rpc-go.debugtalk.bin: [DEBUG] fungo: rpc_server GetNames() success
 [DEBUG] fungo: rpc_client GetNames() success
 [DEBUG] hc-rpc-go: check if plugin has function: funcName=concatenate
 [DEBUG] fungo: rpc_client GetNames() start
 [DEBUG] hc-rpc-go.debugtalk.bin: [DEBUG] fungo: rpc_server GetNames() start
-[DEBUG] hc-rpc-go.debugtalk.bin: [DEBUG] fungo.func_exec: get registered plugin functions: names=["sumtwoint", "setup_hook_example", "teardownhookexample", "sum_two_int", "sum", "sumtwostring", "teardown_hook_example", "sum_ints", "sum_strings", "sumstrings", "concatenate", "sumints", "sum_two_string", "setuphookexample"]
+[DEBUG] hc-rpc-go.debugtalk.bin: [DEBUG] fungo.func_exec: get registered plugin functions: names=["sum_ints", "sum_strings", "concatenate", "teardownhookexample", "sumints", "sum_two_int", "sum", "teardown_hook_example", "sumtwoint", "sum_two_string", "sumtwostring", "sumstrings", "setup_hook_example", "setuphookexample"]
 [DEBUG] hc-rpc-go.debugtalk.bin: [DEBUG] fungo: rpc_server GetNames() success
 [DEBUG] fungo: rpc_client GetNames() success
 [INFO]  fungo: rpc_client Call() start: funcName=sum_ints funcArgs=[1, 2, 3, 4]
@@ -60,7 +60,7 @@
 [DEBUG] hc-rpc-go.debugtalk.bin: [DEBUG] fungo: rpc_server Call() success
 [INFO]  fungo: rpc_client Call() success: result=a2c3.4
 [INFO]  hc-rpc-go: quit hashicorp plugin process
-[DEBUG] hc-rpc-go.debugtalk.bin: 2023/08/07 00:15:33 [DEBUG] plugin: plugin server: accept unix /var/folders/nm/6prc3p4s2tg_27_3fwfv22vh0000gp/T/plugin4148870767: use of closed network connection
-[INFO]  hc-rpc-go: plugin process exited: path=fungo/examples/debugtalk.bin pid=72483
+[DEBUG] hc-rpc-go.debugtalk.bin: 2023/08/10 16:54:04 [DEBUG] plugin: plugin server: accept unix /var/folders/nm/6prc3p4s2tg_27_3fwfv22vh0000gp/T/plugin3244638032: use of closed network connection
+[INFO]  hc-rpc-go: plugin process exited: path=fungo/examples/debugtalk.bin pid=56263
 [DEBUG] hc-rpc-go: plugin exited
 [INFO]  fungo: close log file
