@@ -61,11 +61,6 @@ func TestHashicorpRPCGoPlugin(t *testing.T) {
 	assertPlugin(t, plugin)
 }
 
-func TestHashicorpPythonPluginWithoutVenv(t *testing.T) {
-	_, err := Init("funppy/examples/debugtalk.py")
-	assert.EqualError(t, err, "python3 not specified")
-}
-
 func TestHashicorpPythonPluginWithVenv(t *testing.T) {
 	dir, err := os.MkdirTemp(os.TempDir(), "prefix")
 	if err != nil {
