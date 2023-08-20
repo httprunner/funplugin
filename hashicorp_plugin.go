@@ -10,7 +10,6 @@ import (
 	"github.com/pkg/errors"
 
 	"github.com/httprunner/funplugin/fungo"
-	"github.com/httprunner/funplugin/myexec"
 )
 
 type rpcType string
@@ -44,12 +43,12 @@ func newHashicorpPlugin(path string, option *pluginOption) (*hashicorpPlugin, er
 	var cmd *exec.Cmd
 	if p.option.langType == langTypePython {
 		// hashicorp python plugin
-		cmd = myexec.Command(p.option.python3, path)
+		cmd = exec.Command(p.option.python3, path)
 		// hashicorp python plugin only supports gRPC
 		p.rpcType = rpcTypeGRPC
 	} else {
 		// hashicorp go plugin
-		cmd = myexec.Command(path)
+		cmd = exec.Command(path)
 		// hashicorp go plugin supports grpc and rpc
 		p.rpcType = rpcType(os.Getenv(fungo.PluginTypeEnvName))
 		if p.rpcType != rpcTypeRPC {
