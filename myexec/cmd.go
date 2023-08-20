@@ -142,10 +142,13 @@ func RunCommand(cmdName string, args ...string) error {
 	var stderr bytes.Buffer
 	cmd.Stderr = &stderr
 
-	err := cmd.Run()
-	if err != nil {
+	if err := cmd.Run(); err != nil {
+		stderrStr := stderr.String()
 		logger.Error("exec command failed",
-			"error", err, "stderr", stderr.String())
+			"error", err, "stderr", stderrStr)
+		if stderrStr != "" {
+			err = errors.Wrap(err, stderrStr)
+		}
 		return err
 	}
 
@@ -160,10 +163,13 @@ func ExecCommandInDir(cmd *exec.Cmd, dir string) error {
 	var stderr bytes.Buffer
 	cmd.Stderr = &stderr
 
-	err := cmd.Run()
-	if err != nil {
+	if err := cmd.Run(); err != nil {
+		stderrStr := stderr.String()
 		logger.Error("exec command failed",
-			"error", err, "stderr", stderr.String())
+			"error", err, "stderr", stderrStr)
+		if stderrStr != "" {
+			err = errors.Wrap(err, stderrStr)
+		}
 		return err
 	}
 
