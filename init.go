@@ -1,12 +1,14 @@
 package funplugin
 
 import (
-	"errors"
 	"fmt"
 	"path/filepath"
 
 	"github.com/hashicorp/go-hclog"
+	"github.com/pkg/errors"
+
 	"github.com/httprunner/funplugin/fungo"
+	"github.com/httprunner/funplugin/myexec"
 )
 
 var (
@@ -90,7 +92,13 @@ func Init(path string, options ...Option) (plugin IPlugin, err error) {
 	case ".py":
 		// found hashicorp python plugin file
 		if option.python3 == "" {
-			return nil, errors.New("python3 not specified")
+			// create python3 venv with funppy if python3 not specified
+			option.python3, err = myexec.EnsurePython3Venv("", "funppy")
+			if err != nil {
+				logger.Error("prepare python3 funppy venv failed", "error", err)
+				return nil, errors.Wrap(err,
+					"miss python3, create python3 funppy venv failed")
+			}
 		}
 		option.langType = langTypePython
 		return newHashicorpPlugin(path, option)

@@ -3,6 +3,7 @@
 ## v0.5.3 (2023-08-20)
 
 - feat: replace exec with myexec, add several exec helpers
+- feat: create python3 venv with funppy if python3 not specified
 
 ## v0.5.2 (2023-08-10)
 
