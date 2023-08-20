@@ -8,7 +8,7 @@ import (
 	"github.com/hashicorp/go-plugin"
 )
 
-const Version = "v0.5.2"
+const Version = "v0.5.3"
 
 var (
 	logger = Logger

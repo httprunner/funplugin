@@ -85,11 +85,13 @@ func AssertPythonPackage(python3 string, pkgName, pkgVersion string) error {
 func InstallPythonPackage(python3 string, pkg string) (err error) {
 	var pkgName, pkgVersion string
 	if strings.Contains(pkg, "==") {
+		// specify package version
 		// funppy==0.5.0
 		pkgInfo := strings.Split(pkg, "==")
 		pkgName = pkgInfo[0]
 		pkgVersion = pkgInfo[1]
 	} else {
+		// package version not specified, install the latest by default
 		// funppy
 		pkgName = pkg
 	}
@@ -115,7 +117,7 @@ func InstallPythonPackage(python3 string, pkg string) (err error) {
 	if pypiIndexURL == "" {
 		pypiIndexURL = "https://pypi.org/simple" // default
 	}
-	err = RunCommand(python3, "-m", "pip", "install", "--upgrade", pkg,
+	err = RunCommand(python3, "-m", "pip", "install", pkg, "--upgrade",
 		"--index-url", pypiIndexURL,
 		"--quiet", "--disable-pip-version-check")
 	if err != nil {
