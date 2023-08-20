@@ -4,6 +4,7 @@
 
 - feat: replace exec with myexec, add several exec helpers
 - feat: create python3 venv with funppy if python3 not specified
+- fix: create log file directory if not exists in InitLogger
 
 ## v0.5.2 (2023-08-10)
 

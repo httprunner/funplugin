@@ -3,6 +3,7 @@ package fungo
 import (
 	"io"
 	"os"
+	"path/filepath"
 
 	hclog "github.com/hashicorp/go-hclog"
 	"github.com/hashicorp/go-plugin"
@@ -27,7 +28,13 @@ var file *os.File
 func InitLogger(logLevel hclog.Level, logFile string, disableTime bool) hclog.Logger {
 	output := hclog.DefaultOutput
 	if logFile != "" {
-		var err error
+		err := os.MkdirAll(filepath.Dir(logFile), os.ModePerm)
+		if err != nil {
+			logger.Error("create log file directory failed",
+				"error", err, "logFile", logFile)
+			os.Exit(1)
+		}
+
 		file, err = os.OpenFile(logFile, os.O_CREATE|os.O_RDWR, 0666)
 		if err != nil {
 			logger.Error("open log file failed", "error", err)
@@ -43,7 +50,8 @@ func InitLogger(logLevel hclog.Level, logFile string, disableTime bool) hclog.Lo
 		Level:       logLevel,
 		Color:       hclog.AutoColor,
 	})
-	logger.Info("set plugin log level", "level", logLevel.String())
+	logger.Info("set plugin log level",
+		"level", logLevel.String(), "logFile", logFile)
 	return logger
 }
 
