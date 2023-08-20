@@ -8,18 +8,18 @@ package funplugin
 import (
 	"fmt"
 	"os"
-	"os/exec"
 	"testing"
 
+	"github.com/httprunner/funplugin/myexec"
 	"github.com/stretchr/testify/assert"
 )
 
 func buildGoPlugin() {
 	fmt.Println("[setup] build go plugin")
 	// flag -race is necessary in order to be consistent with go test
-	cmd := exec.Command("go", "build", "-buildmode=plugin", "-race",
+	err := myexec.RunCommand("go", "build", "-buildmode=plugin", "-race",
 		"-o=debugtalk.so", "fungo/examples/debugtalk.go")
-	if err := cmd.Run(); err != nil {
+	if err != nil {
 		panic(err)
 	}
 }

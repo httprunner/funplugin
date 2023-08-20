@@ -1,5 +1,9 @@
 # Release History
 
+## v0.5.3 (2023-08-20)
+
+- feat: replace exec with myexec, add several exec helpers
+
 ## v0.5.2 (2023-08-10)
 
 - feat: add Init option `WithDebugLogger(debug bool)` to configure whether to print debug level logs in plugin process

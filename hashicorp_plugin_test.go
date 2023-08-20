@@ -1,14 +1,13 @@
 package funplugin
 
 import (
-	"io/ioutil"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"runtime"
 	"testing"
 
 	"github.com/httprunner/funplugin/fungo"
+	"github.com/httprunner/funplugin/myexec"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -16,10 +15,10 @@ var pluginBinPath = "fungo/examples/debugtalk.bin"
 
 func buildHashicorpGoPlugin() {
 	logger.Info("[setup test] build hashicorp go plugin", "path", pluginBinPath)
-	cmd := exec.Command("go", "build",
+	err := myexec.RunCommand("go", "build",
 		"-o", pluginBinPath,
 		"fungo/examples/hashicorp.go", "fungo/examples/debugtalk.go")
-	if err := cmd.Run(); err != nil {
+	if err != nil {
 		panic(err)
 	}
 }
@@ -68,14 +67,14 @@ func TestHashicorpPythonPluginWithoutVenv(t *testing.T) {
 }
 
 func TestHashicorpPythonPluginWithVenv(t *testing.T) {
-	dir, err := ioutil.TempDir(os.TempDir(), "prefix")
+	dir, err := os.MkdirTemp(os.TempDir(), "prefix")
 	if err != nil {
 		t.Fatal(err)
 	}
 	defer os.RemoveAll(dir)
 
 	venvDir := filepath.Join(dir, ".hrp", "venv")
-	err = exec.Command("python3", "-m", "venv", venvDir).Run()
+	err = myexec.RunCommand("python3", "-m", "venv", venvDir)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -87,7 +86,7 @@ func TestHashicorpPythonPluginWithVenv(t *testing.T) {
 		python3 = filepath.Join(venvDir, "bin", "python3")
 	}
 
-	err = exec.Command(python3, "-m", "pip", "install", "funppy").Run()
+	err = myexec.RunCommand(python3, "-m", "pip", "install", "funppy")
 	if err != nil {
 		t.Fatal(err)
 	}
