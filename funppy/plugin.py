@@ -56,7 +56,7 @@ def check_available_port(port):
     except OSError:
         # The port is already in use, return True
         return True
-        
+
 def serve():
     # Generate a random port
     random_port = random.randrange(20000, 60000)
