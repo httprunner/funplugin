@@ -8,7 +8,6 @@ import (
 	"os/exec"
 	"path/filepath"
 	"strconv"
-	"strings"
 	"syscall"
 
 	"github.com/pkg/errors"
@@ -91,11 +90,8 @@ func ensurePython3Venv(venvDir string, packages ...string) (python3 string, err 
 }
 
 func Command(name string, arg ...string) *exec.Cmd {
-	// "cmd /c" carries out the command specified by string and then stops
-	// refer: https://docs.microsoft.com/en-us/windows-server/administration/windows-commands/cmd
-	cmd := exec.Command("cmd.exe")
+	cmd := exec.Command(name, arg...)
 	cmd.SysProcAttr = &syscall.SysProcAttr{
-		CmdLine:    strings.Join(append([]string{"/c", name}, arg...), " "),
 		HideWindow: true,
 	}
 	return cmd
