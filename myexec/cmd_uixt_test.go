@@ -2,7 +2,7 @@ package myexec
 
 import "testing"
 
-func TestRunShell(t *testing.T) {
+func TestRunShellUnix(t *testing.T) {
 	exitCode, err := RunShell("echo hello world")
 	if err != nil {
 		t.Fatal(err)
