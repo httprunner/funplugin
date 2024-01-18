@@ -128,9 +128,9 @@ func InstallPythonPackage(python3 string, pkg string) (err error) {
 }
 
 func RunShell(shellString string) (exitCode int, err error) {
-	logger.Info("exec shell string", "content", shellString)
-
 	cmd := initShellExec(shellString)
+	logger.Info("exec shell string", "content", cmd.String())
+
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 
@@ -150,7 +150,7 @@ func RunShell(shellString string) (exitCode int, err error) {
 
 		// got failed command exit code
 		exitCode := exitErr.ExitCode()
-		return exitCode, nil
+		return exitCode, err
 	}
 
 	return 0, nil
@@ -158,7 +158,6 @@ func RunShell(shellString string) (exitCode int, err error) {
 
 func RunCommand(cmdName string, args ...string) error {
 	cmd := Command(cmdName, args...)
-	logger.Info("exec command", "cmd", cmd.String())
 
 	// add cmd dir path to $PATH
 	if cmdDir := filepath.Dir(cmdName); cmdDir != "" {
@@ -169,21 +168,8 @@ func RunCommand(cmdName string, args ...string) error {
 		}
 	}
 
-	// print stderr output
-	var stderr bytes.Buffer
-	cmd.Stderr = &stderr
-
-	if err := cmd.Run(); err != nil {
-		stderrStr := stderr.String()
-		logger.Error("exec command failed",
-			"error", err, "stderr", stderrStr)
-		if stderrStr != "" {
-			err = errors.Wrap(err, stderrStr)
-		}
-		return err
-	}
-
-	return nil
+	_, err := RunShell(cmd.String())
+	return err
 }
 
 func ExecCommandInDir(cmd *exec.Cmd, dir string) error {
