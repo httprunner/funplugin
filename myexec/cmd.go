@@ -158,6 +158,7 @@ func RunShell(shellString string) (exitCode int, err error) {
 
 func RunCommand(cmdName string, args ...string) error {
 	cmd := Command(cmdName, args...)
+	logger.Info("run command", "cmd", cmd.String())
 
 	// add cmd dir path to $PATH
 	if cmdDir := filepath.Dir(cmdName); cmdDir != "" {
