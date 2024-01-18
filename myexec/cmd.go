@@ -127,6 +127,35 @@ func InstallPythonPackage(python3 string, pkg string) (err error) {
 	return AssertPythonPackage(python3, pkgName, pkgVersion)
 }
 
+func RunShell(shellString string) (exitCode int, err error) {
+	logger.Info("exec shell string", "content", shellString)
+
+	cmd := initShellExec(shellString)
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+
+	err = cmd.Start()
+	if err != nil {
+		return 1, errors.Wrap(err, "start running command failed")
+	}
+
+	// wait command done and get exit code
+	err = cmd.Wait()
+	if err != nil {
+		exitErr, ok := err.(*exec.ExitError)
+		if !ok {
+			return 1, errors.Wrap(err, "get command exit code failed")
+		}
+		logger.Error("exec command failed", "exitCode", exitCode, "error", err)
+
+		// got failed command exit code
+		exitCode := exitErr.ExitCode()
+		return exitCode, nil
+	}
+
+	return 0, nil
+}
+
 func RunCommand(cmdName string, args ...string) error {
 	cmd := Command(cmdName, args...)
 	logger.Info("exec command", "cmd", cmd.String())

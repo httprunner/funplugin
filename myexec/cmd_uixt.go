@@ -67,3 +67,8 @@ func Command(name string, arg ...string) *exec.Cmd {
 func KillProcessesByGpid(cmd *exec.Cmd) error {
 	return syscall.Kill(-cmd.Process.Pid, syscall.SIGKILL)
 }
+
+func initShellExec(shellString string) *exec.Cmd {
+	// bash -c shellString
+	return exec.Command("bash", "-c", shellString)
+}

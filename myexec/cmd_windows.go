@@ -105,3 +105,8 @@ func KillProcessesByGpid(cmd *exec.Cmd) error {
 	killCmd := Command("taskkill", "/T", "/F", "/PID ", strconv.Itoa(cmd.Process.Pid))
 	return killCmd.Run()
 }
+
+func initShellExec(shellString string) *exec.Cmd {
+	// cmd /C shellString
+	return exec.Command("cmd", "/C", shellString)
+}
