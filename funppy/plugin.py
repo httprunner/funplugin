@@ -3,6 +3,7 @@ import logging
 import random
 import sys
 import time
+import socket
 from concurrent import futures
 from typing import Callable
 
@@ -45,13 +46,29 @@ class DebugTalkServicer(debugtalk_pb2_grpc.DebugTalkServicer):
         response = debugtalk_pb2.CallResponse(value=v)
         return response
 
+def check_available_port(port):
+    try:
+        # Create a socket object and attempt to bind it to the specified port
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+            s.bind(("127.0.0.1", port))
+        # The port is available, return False
+        return False
+    except OSError:
+        # The port is already in use, return True
+        return True
 
 def serve():
-    # Start the server.
+    # Generate a random port
+    random_port = random.randrange(20000, 60000)
+
+    # Check if the random port is already in use
+    while check_available_port(random_port):
+        random_port = random.randrange(20000, 60000)
+
+    # Create the gRPC server and continue with the rest of your code
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
     debugtalk_pb2_grpc.add_DebugTalkServicer_to_server(DebugTalkServicer(), server)
 
-    random_port = random.randrange(20000, 60000)
     server.add_insecure_port(f'127.0.0.1:{random_port}')
     server.start()
 
@@ -64,7 +81,6 @@ def serve():
             time.sleep(60 * 60 * 24)
     except KeyboardInterrupt:
         server.stop(0)
-
 
 if __name__ == '__main__':
     serve()
