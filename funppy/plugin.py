@@ -15,6 +15,7 @@ __all__ = ["register", "serve"]
 
 functions = {}
 
+
 def register(func_name: str, func: Callable):
     logging.info(f"register function: {func_name}")
     functions[func_name] = func
@@ -30,46 +31,51 @@ class DebugTalkServicer(debugtalk_pb2_grpc.DebugTalkServicer):
 
     def Call(self, request: debugtalk_pb2.CallRequest, context: grpc.ServicerContext):
         if request.name not in functions:
-            raise Exception(f'Function {request.name} not registered!')
+            raise Exception(f"Function {request.name} not registered!")
 
         fn = functions[request.name]
         args = json.loads(request.args)
         value = fn(*args)
 
         if isinstance(value, (int, float)):
-            v = str(value).encode('utf-8')
+            v = str(value).encode("utf-8")
         elif isinstance(value, (str, dict, list)):
-            v = json.dumps(value).encode('utf-8')
+            v = json.dumps(value).encode("utf-8")
         else:
-            raise Exception(f'Function return type {type(value)} not supported!')
+            raise Exception(f"Function return type {type(value)} not supported!")
 
         response = debugtalk_pb2.CallResponse(value=v)
         return response
 
-def check_available_port(port):
-    try:
-        # Create a socket object and attempt to bind it to the specified port
-        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-            s.bind(("127.0.0.1", port))
-        # The port is available, return False
-        return False
-    except OSError:
-        # The port is already in use, return True
-        return True
+
+def get_available_port() -> int:
+    while True:
+        random_port = random.randrange(20000, 60000)
+
+        try:
+            # Create a socket object and attempt to bind it to the specified port
+            with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+                s.bind(("127.0.0.1", random_port))
+
+            # The port is available
+            return random_port
+
+        except OSError:
+            # The port is already in use, regenerate
+            continue
+
 
 def serve():
-    # Generate a random port
-    random_port = random.randrange(20000, 60000)
+    # Start the server.
 
-    # Check if the random port is already in use
-    while check_available_port(random_port):
-        random_port = random.randrange(20000, 60000)
+    # Generate a random port
+    random_port = get_available_port()
 
     # Create the gRPC server and continue with the rest of your code
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
     debugtalk_pb2_grpc.add_DebugTalkServicer_to_server(DebugTalkServicer(), server)
 
-    server.add_insecure_port(f'127.0.0.1:{random_port}')
+    server.add_insecure_port(f"127.0.0.1:{random_port}")
     server.start()
 
     # Output information
@@ -82,5 +88,6 @@ def serve():
     except KeyboardInterrupt:
         server.stop(0)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     serve()

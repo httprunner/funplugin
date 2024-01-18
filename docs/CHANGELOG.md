@@ -4,6 +4,8 @@
 
 - feat: add RunShell function to execute shell string commands and capture synchronous output
 - change: replace RunCommand with synchronous output
+- fix: check python package in windows
+- fix: prevent port conflicts when generating random ports
 
 ## v0.5.3 (2023-08-20)
 
