@@ -146,10 +146,10 @@ func RunShell(shellString string) (exitCode int, err error) {
 		if !ok {
 			return 1, errors.Wrap(err, "get command exit code failed")
 		}
-		logger.Error("exec command failed", "exitCode", exitCode, "error", err)
 
 		// got failed command exit code
 		exitCode := exitErr.ExitCode()
+		logger.Error("exec command failed", "exitCode", exitCode, "error", err)
 		return exitCode, err
 	}
 
