@@ -59,7 +59,7 @@ func ExecPython3Command(cmdName string, args ...string) error {
 
 func AssertPythonPackage(python3 string, pkgName, pkgVersion string) error {
 	out, err := Command(
-		python3, "-c", fmt.Sprintf("import %s; print(%s.__version__)", pkgName, pkgName),
+		python3, "-c", fmt.Sprintf("\"import %s; print(%s.__version__)\"", pkgName, pkgName),
 	).Output()
 	if err != nil {
 		return fmt.Errorf("python package %s not found", pkgName)
