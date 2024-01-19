@@ -5,27 +5,27 @@ package myexec
 import "testing"
 
 func TestRunShellUnix(t *testing.T) {
-	exitCode, err := RunShell("echo hello world")
-	if err != nil {
-		t.Fatal(err)
-	}
-	if exitCode != 0 {
-		t.Fatalf("expected exit code 0, got %d", exitCode)
+	testData := []struct {
+		shell          string
+		expectExitCode int
+	}{
+		{"echo hello world", 0},
+		{"A=123; echo $A", 0},
+		{"A=123 && echo $A", 0},
+		{"export A=123 && echo $A", 0},
+		{"for i in {1..3}; do echo $i; sleep 1; done", 0},
+
+		{"ls -l; exit 3", 3},
 	}
 
-	exitCode, err = RunShell("for i in {1..3}; do echo $i; sleep 1; done")
-	if err != nil {
-		t.Fatal(err)
-	}
-	if exitCode != 0 {
-		t.Fatalf("expected exit code 0, got %d", exitCode)
-	}
-
-	exitCode, err = RunShell("ls -l; exit 3")
-	if err == nil {
-		t.Fatal(err)
-	}
-	if exitCode != 3 {
-		t.Fatalf("expected exit code 3, got %d", exitCode)
+	for _, td := range testData {
+		exitCode, err := RunShell(td.shell)
+		if exitCode != td.expectExitCode {
+			t.Fatalf("expected exit code 0, got %d", exitCode)
+		}
+		if td.expectExitCode == 0 && err != nil ||
+			td.expectExitCode != 0 && err == nil {
+			t.Fatal(err)
+		}
 	}
 }
