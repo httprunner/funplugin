@@ -6,6 +6,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"runtime"
 	"strings"
 
 	"github.com/httprunner/funplugin/fungo"
@@ -162,7 +163,12 @@ func RunCommand(cmdName string, args ...string) error {
 
 	// add cmd dir path to $PATH
 	if cmdDir := filepath.Dir(cmdName); cmdDir != "" {
-		path := fmt.Sprintf("%s:%s", cmdDir, PATH)
+		var path string
+		if runtime.GOOS == "windows" {
+			path = fmt.Sprintf("%s;%s", cmdDir, PATH)
+		} else {
+			path = fmt.Sprintf("%s:%s", cmdDir, PATH)
+		}
 		if err := os.Setenv("PATH", path); err != nil {
 			logger.Error("set env $PATH failed", "error", err)
 			return err
