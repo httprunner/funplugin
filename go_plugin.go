@@ -84,3 +84,7 @@ func (p *goPlugin) Quit() error {
 	// no need to quit for go plugin
 	return nil
 }
+
+func (p *goPlugin) StartHeartbeat() {
+
+}
