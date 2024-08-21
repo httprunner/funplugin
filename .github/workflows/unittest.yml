@@ -21,7 +21,14 @@ jobs:
         uses: actions/setup-go@v2
         with:
           go-version: ${{ matrix.go-version }}
-      - name: Install Python plugin dependencies
+      - name: Install Python plugin dependencies for macos
+        if: matrix.os == 'macos-latest'
+        run: |
+          python3 -m venv .venv
+          source .venv/bin/activate
+          python3 -m pip install funppy
+      - name: Install Python plugin dependencies for linux/windows
+        if: matrix.os == 'ubuntu-latest' || matrix.os == 'windows-latest'
         run: python3 -m pip install funppy
       - name: Checkout code
         uses: actions/checkout@v2
