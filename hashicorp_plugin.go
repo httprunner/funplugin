@@ -5,6 +5,9 @@ import (
 	"os"
 	"os/exec"
 	"sync"
+	"time"
+
+	"github.com/hashicorp/go-hclog"
 
 	"github.com/hashicorp/go-plugin"
 	"github.com/pkg/errors"
@@ -39,63 +42,22 @@ func newHashicorpPlugin(path string, option *pluginOption) (*hashicorpPlugin, er
 		option: option,
 	}
 
-	// cmd
-	var cmd *exec.Cmd
-	if p.option.langType == langTypePython {
-		// hashicorp python plugin
-		cmd = exec.Command(p.option.python3, path)
-		// hashicorp python plugin only supports gRPC
-		p.rpcType = rpcTypeGRPC
-	} else {
-		// hashicorp go plugin
-		cmd = exec.Command(path)
-		// hashicorp go plugin supports grpc and rpc
-		p.rpcType = rpcType(os.Getenv(fungo.PluginTypeEnvName))
-		if p.rpcType != rpcTypeRPC {
-			p.rpcType = rpcTypeGRPC // default
-		}
+	// plugin type, grpc or rpc
+	p.rpcType = rpcType(os.Getenv(fungo.PluginTypeEnvName))
+	if p.rpcType != rpcTypeRPC {
+		p.rpcType = rpcTypeGRPC // default
 	}
-	cmd.Env = append(os.Environ(), fmt.Sprintf("%s=%s", fungo.PluginTypeEnvName, p.rpcType))
-
 	// logger
 	logger = logger.ResetNamed(fmt.Sprintf("hc-%v-%v", p.rpcType, p.option.langType))
 
-	// launch the plugin process
-	logger.Info("launch the plugin process")
-	p.client = plugin.NewClient(&plugin.ClientConfig{
-		HandshakeConfig: fungo.HandshakeConfig,
-		Plugins: map[string]plugin.Plugin{
-			rpcTypeRPC.String():  &fungo.RPCPlugin{},
-			rpcTypeGRPC.String(): &fungo.GRPCPlugin{},
-		},
-		Cmd:    cmd,
-		Logger: logger,
-		AllowedProtocols: []plugin.Protocol{
-			plugin.ProtocolNetRPC,
-			plugin.ProtocolGRPC,
-		},
-	})
-
-	// Connect via RPC/gRPC
-	rpcClient, err := p.client.Client()
-	if err != nil {
-		return nil, errors.Wrap(err, fmt.Sprintf("connect %s plugin failed", p.rpcType))
+	// 失败则继续尝试，连续三次失败则返回错误
+	err := p.startPlugin()
+	if err == nil {
+		return p, err
 	}
-
-	// Request the plugin
-	raw, err := rpcClient.Dispense(p.rpcType.String())
-	if err != nil {
-		return nil, errors.Wrap(err, fmt.Sprintf("request %s plugin failed", p.rpcType))
-	}
-
-	// We should have a Function now! This feels like a normal interface
-	// implementation but is in fact over an RPC connection.
-	p.funcCaller = raw.(fungo.IFuncCaller)
-
-	p.cachedFunctions = sync.Map{}
 	logger.Info("load hashicorp go plugin success", "path", path)
 
-	return p, nil
+	return nil, err
 }
 
 func (p *hashicorpPlugin) Type() string {
@@ -131,6 +93,92 @@ func (p *hashicorpPlugin) Has(funcName string) bool {
 
 func (p *hashicorpPlugin) Call(funcName string, args ...interface{}) (interface{}, error) {
 	return p.funcCaller.Call(funcName, args...)
+}
+
+func (p *hashicorpPlugin) StartHeartbeat() {
+	ticker := time.NewTicker(15 * time.Second)
+	defer ticker.Stop()
+	var err error
+
+	for range ticker.C {
+		// Check the client connection status
+		logger.Info("heartbreak......")
+		if p.client.Exited() {
+			logger.Error(fmt.Sprintf("plugin exited, restarting..."))
+			err = p.startPlugin()
+			if err != nil {
+				break
+			}
+		}
+	}
+}
+
+func (p *hashicorpPlugin) startPlugin() error {
+	var cmd *exec.Cmd
+	if p.option.langType == langTypePython {
+		// hashicorp python plugin
+		cmd = exec.Command(p.option.python3, p.path)
+		// hashicorp python plugin only supports gRPC
+		p.rpcType = rpcTypeGRPC
+	} else {
+		// hashicorp go plugin
+		cmd = exec.Command(p.path)
+		// hashicorp go plugin supports grpc and rpc
+		p.rpcType = rpcType(os.Getenv(fungo.PluginTypeEnvName))
+		if p.rpcType != rpcTypeRPC {
+			p.rpcType = rpcTypeGRPC // default
+		}
+	}
+	cmd.Env = append(os.Environ(), fmt.Sprintf("%s=%s", fungo.PluginTypeEnvName, p.rpcType))
+
+	var err error
+	maxRetryCount := 3
+	for i := 0; i < maxRetryCount; i++ {
+		err = p.tryStartPlugin(cmd, logger)
+		if err == nil {
+			return nil
+		}
+		time.Sleep(time.Second * time.Duration(i*i)) // sleep temporarily before next try
+	}
+	logger.Error("failed to start plugin after max retries")
+	return errors.Wrap(err, "failed to start plugin after max retries")
+}
+
+func (p *hashicorpPlugin) tryStartPlugin(cmd *exec.Cmd, logger hclog.Logger) error {
+	// launch the plugin process
+	p.client = plugin.NewClient(&plugin.ClientConfig{
+		HandshakeConfig: fungo.HandshakeConfig,
+		Plugins: map[string]plugin.Plugin{
+			rpcTypeRPC.String():  &fungo.RPCPlugin{},
+			rpcTypeGRPC.String(): &fungo.GRPCPlugin{},
+		},
+		Cmd:    cmd,
+		Logger: logger,
+		AllowedProtocols: []plugin.Protocol{
+			plugin.ProtocolNetRPC,
+			plugin.ProtocolGRPC,
+		},
+	})
+
+	// Connect via RPC/gRPC
+	rpcClient, err := p.client.Client()
+	if err != nil {
+		return errors.Wrap(err, fmt.Sprintf("connect %s plugin failed", p.rpcType))
+	}
+
+	// Request the plugin
+	raw, err := rpcClient.Dispense(p.rpcType.String())
+	if err != nil {
+		return errors.Wrap(err, fmt.Sprintf("request %s plugin failed", p.rpcType))
+	}
+
+	// We should have a Function now! This feels like a normal interface
+	// implementation but is in fact over an RPC connection.
+	p.funcCaller = raw.(fungo.IFuncCaller)
+
+	p.cachedFunctions = sync.Map{}
+
+	return nil
 }
 
 func (p *hashicorpPlugin) Quit() error {

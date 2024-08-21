@@ -21,6 +21,7 @@ type IPlugin interface {
 	Has(funcName string) bool                                       // check if plugin has function
 	Call(funcName string, args ...interface{}) (interface{}, error) // call function
 	Quit() error                                                    // quit plugin
+	StartHeartbeat()                                                // heartbeat to keep the plugin alive
 }
 
 type langType string
