@@ -1,5 +1,10 @@
 # Release History
 
+## v0.5.5 (2024-08-21)
+
+- feat: add heartbeat to keep the plugin alive
+- fix: set wrong env path in windows
+
 ## v0.5.4 (2024-01-18)
 
 - feat: add RunShell function to execute shell string commands and capture synchronous output
