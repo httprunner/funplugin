@@ -28,7 +28,7 @@ jobs:
       - name: Run coverage
         run: go test -coverprofile="cover.out" -covermode=atomic -race ./...
       - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v2
+        uses: codecov/codecov-action@v4
         with:
           name: hrp plugin # User defined upload name. Visible in Codecov UI
           token: ${{ secrets.CODECOV_TOKEN }} # Repository upload token
